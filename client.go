@@ -53,5 +53,5 @@ func Dial(c Creds) (*Client, error) {
 type Meta struct {
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
-	URL       url.URL   `json:"url"`
+	URL       string    `json:"url"`
 }
