@@ -1,9 +1,13 @@
 package main
 
 import (
+	"encoding/json"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
+
+	"astuart.co/clyde"
 )
 
 const (
@@ -26,7 +30,24 @@ func (c Creds) Values() url.Values {
 type Client struct {
 	Token   string
 	Account *Account
-	c       *http.Client
+	*http.Client
+}
+
+func Dial(c Creds) (*Client, error) {
+	res, err := http.Post(login, "application/x-www-form-urlencoded", strings.NewReader(c.Values().Encode()))
+	if err != nil {
+		return nil, err
+	}
+	defer res.Body.Close()
+
+	var cli Client
+	err = json.NewDecoder(res.Body).Decode(&cli)
+
+	cli.Client = &http.Client{
+		Transport: clyde.HeaderRoundTripper{"Authorization": "Token " + cli.Token},
+	}
+
+	return &cli, err
 }
 
 type Meta struct {

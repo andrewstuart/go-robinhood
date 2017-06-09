@@ -15,7 +15,7 @@ type Position struct {
 }
 
 func (c Client) GetPositions(a Account) ([]Position, error) {
-	res, err := c.c.Get(a.Positions)
+	res, err := c.Get(a.Positions)
 	if err != nil {
 		return nil, err
 	}
