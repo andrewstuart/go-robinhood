@@ -1,8 +1,8 @@
 package main
 
 type Instrument struct {
-	BloombergUnique    string `json:"bloomberg_unique"`
-	Country            `json:"country"`
+	BloombergUnique    string      `json:"bloomberg_unique"`
+	Country            Country     `json:"country"`
 	DayTradeRatio      string      `json:"day_trade_ratio"`
 	Fundamentals       string      `json:"fundamentals"`
 	ID                 string      `json:"id"`

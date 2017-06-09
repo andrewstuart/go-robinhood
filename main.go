@@ -6,39 +6,11 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"net/url"
 	"os"
 	"strings"
-	"time"
+
+	"astuart.co/clyde"
 )
-
-const (
-	base     = "https://api.robinhood.com/"
-	login    = base + "api-token-auth/"
-	accounts = base + "accounts/"
-)
-
-type Creds struct {
-	Username, Password string
-}
-
-func (c Creds) Values() url.Values {
-	return url.Values{
-		"username": []string{c.Username},
-		"password": []string{c.Password},
-	}
-}
-
-type Client struct {
-	Token   string
-	Account *Account
-	c       *http.Client
-}
-
-type Meta struct {
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
-}
 
 type Account struct {
 	Meta
@@ -62,7 +34,6 @@ type Account struct {
 	UnclearedDeposits          string      `json:"uncleared_deposits"`
 	UnsettledFunds             string      `json:"unsettled_funds"`
 	UpdatedAt                  string      `json:"updated_at"`
-	URL                        string      `json:"url"`
 	User                       string      `json:"user"`
 	WithdrawalHalted           bool        `json:"withdrawal_halted"`
 }
@@ -108,7 +79,7 @@ func Dial(c Creds) (*Client, error) {
 	err = json.NewDecoder(res.Body).Decode(&cli)
 
 	cli.c = &http.Client{
-		Transport: tokenRoundtripper(cli.Token),
+		Transport: clyde.HeaderRoundTripper{"Authorization": "Token " + cli.Token},
 	}
 
 	return &cli, err
