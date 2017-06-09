@@ -1,4 +1,6 @@
-package robinhood
+package main
+
+import "encoding/json"
 
 type Position struct {
 	Account                 string `json:"account"`
@@ -15,10 +17,14 @@ type Position struct {
 }
 
 func (c Client) GetPositions(a Account) ([]Position, error) {
-	var r struct{ Response []Position }
 	res, err := c.c.Get(a.Positions)
 	if err != nil {
 		return nil, err
 	}
 	defer res.Body.Close()
+
+	var r struct{ Results []Position }
+	err = json.NewDecoder(res.Body).Decode(&r)
+
+	return r.Results, err
 }

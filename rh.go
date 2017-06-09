@@ -30,8 +30,9 @@ func (c Creds) Values() url.Values {
 }
 
 type Client struct {
-	Token string
-	c     *http.Client
+	Token   string
+	Account *Account
+	c       *http.Client
 }
 
 type Meta struct {
@@ -83,7 +84,7 @@ func (t tokenRoundtripper) RoundTrip(req *http.Request) (*http.Response, error) 
 	return http.DefaultClient.Do(req)
 }
 
-func (c Client) GetAccount() (*Account, error) {
+func (c *Client) GetAccounts() ([]Account, error) {
 	var r struct{ Results []Account }
 	res, err := c.c.Get(accounts)
 	if err != nil {
@@ -93,7 +94,7 @@ func (c Client) GetAccount() (*Account, error) {
 
 	err = json.NewDecoder(res.Body).Decode(&r)
 
-	return &r.Results[0], err
+	return r.Results, err
 }
 
 func Dial(c Creds) (*Client, error) {
@@ -123,24 +124,24 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	a, err := c.GetAccount()
+	a, err := c.GetAccounts()
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Printf("a = %#v\n", a)
 
-	res, err := c.c.Get(a.Positions)
+	pos, err := c.GetPositions(a[0])
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer res.Body.Close()
 
-	f, err := os.OpenFile("out.json", os.O_CREATE|os.O_TRUNC|os.O_RDWR, 0600)
-	if err != nil {
-		log.Fatal(err)
+	for _, p := range pos {
+		res, err := c.c.Get(p.Instrument)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer res.Body.Close()
+
+		io.Copy(os.Stdout, res.Body)
+		log.Println("Next")
 	}
-	defer f.Close()
-
-	io.Copy(f, res.Body)
-
 }
