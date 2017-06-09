@@ -11,9 +11,10 @@ import (
 )
 
 const (
-	base     = "https://api.robinhood.com/"
-	login    = base + "api-token-auth/"
-	accounts = base + "accounts/"
+	epBase     = "https://api.robinhood.com/"
+	epLogin    = epBase + "api-token-auth/"
+	epAccounts = epBase + "accounts/"
+	epQuotes   = epBase + "quotes/"
 )
 
 type Creds struct {
@@ -34,7 +35,7 @@ type Client struct {
 }
 
 func Dial(c Creds) (*Client, error) {
-	res, err := http.Post(login, "application/x-www-form-urlencoded", strings.NewReader(c.Values().Encode()))
+	res, err := http.Post(epLogin, "application/x-www-form-urlencoded", strings.NewReader(c.Values().Encode()))
 	if err != nil {
 		return nil, err
 	}

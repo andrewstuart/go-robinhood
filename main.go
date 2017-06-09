@@ -16,6 +16,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	a, err := c.GetAccounts()
 	if err != nil {
 		log.Fatal(err)
@@ -25,6 +26,8 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	syms := []string{}
 
 	for _, p := range pos {
 		res, err := c.Get(p.Instrument)

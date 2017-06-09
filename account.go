@@ -40,7 +40,7 @@ type CashBalances struct {
 
 func (c *Client) GetAccounts() ([]Account, error) {
 	var r struct{ Results []Account }
-	res, err := c.Get(accounts)
+	res, err := c.Get(epAccounts)
 	if err != nil {
 		return nil, err
 	}
