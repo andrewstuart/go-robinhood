@@ -2,8 +2,6 @@ package robinhood
 
 import (
 	"encoding/json"
-	"io"
-	"os"
 )
 
 type Portfolio struct {
@@ -41,7 +39,7 @@ func (c *Client) GetPortfolios(acc *Account) ([]Portfolio, error) {
 
 	if acc == nil {
 		var p struct{ Results []Portfolio }
-		err = json.NewDecoder(io.TeeReader(res.Body, os.Stderr)).Decode(&p)
+		err = json.NewDecoder(res.Body).Decode(&p)
 		return p.Results, err
 	}
 

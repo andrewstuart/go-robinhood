@@ -2,10 +2,12 @@ package robinhood
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"os"
+	"path"
 	"strings"
 )
 
@@ -50,9 +52,14 @@ type CredsCacher struct {
 func (c *CredsCacher) GetToken() (string, error) {
 	mustLogin := false
 
-	_, err := os.Stat(c.Path)
+	err := os.MkdirAll(path.Dir(c.Path), 0750)
 	if err != nil {
-		if err, ok := err.(*os.PathError); ok && err.Err == os.ErrNotExist {
+		return "", fmt.Errorf("error creating path for token: %s", err)
+	}
+
+	_, err = os.Stat(c.Path)
+	if err != nil {
+		if strings.Contains(err.Error(), "no such file") {
 			mustLogin = true
 		} else {
 			return "", err
