@@ -11,10 +11,11 @@ import (
 )
 
 const (
-	epBase     = "https://api.robinhood.com/"
-	epLogin    = epBase + "api-token-auth/"
-	epAccounts = epBase + "accounts/"
-	epQuotes   = epBase + "quotes/"
+	epBase       = "https://api.robinhood.com/"
+	epLogin      = epBase + "api-token-auth/"
+	epAccounts   = epBase + "accounts/"
+	epQuotes     = epBase + "quotes/"
+	epPortfolios = epBase + "portfolios/"
 )
 
 type Creds struct {

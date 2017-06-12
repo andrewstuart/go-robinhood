@@ -3,10 +3,14 @@ package main
 import (
 	"fmt"
 	"log"
+	"math"
 	"os"
 	"strconv"
+	"strings"
 	"text/tabwriter"
 	"time"
+
+	"github.com/fatih/color"
 )
 
 type ip struct {
@@ -61,14 +65,12 @@ func main() {
 
 		}
 	}
-	tw := tabwriter.NewWriter(os.Stdout, 30, 2, 1, ' ', 0)
+	tw := tabwriter.NewWriter(os.Stdout, 22, 2, 1, ' ', 0)
 
 	updatePos()
 
-	for _, s := range syms {
-		fmt.Fprint(tw, s+"\t")
-	}
-	fmt.Fprint(tw, "\n")
+	fmt.Fprint(tw, strings.Join(syms, "\t"))
+	fmt.Fprint(tw, "\tTotal\n")
 	tw.Flush()
 
 	i := 0
@@ -82,6 +84,8 @@ func main() {
 		if err != nil {
 			log.Fatal("Quotes error", err)
 		}
+
+		tot := 0.0
 
 		for _, q := range q {
 			qip := positions[q.Symbol]
@@ -100,11 +104,26 @@ func main() {
 
 			*qip.last = q
 
-			fmt.Fprintf(tw, "%.0f@$%.3f ($%.2f) %.2f\t", qty, price, qty*price, delta)
+			tot += qty * price
+
+			fmt.Fprintf(tw, "%.0f@$%.3f ", qty, price)
+
+			// Print delta
+			c := color.Reset
+			if delta > 0.0 {
+				c = color.FgGreen
+				math.Tru
+			} else if delta < -0.0 {
+				c = color.FgRed
+			}
+
+			color.New(c).Fprintf(tw, "%.2f", delta)
+			fmt.Fprint(tw, "\t")
 		}
+		fmt.Fprintf(tw, "%.2f", tot)
 		fmt.Fprintln(tw)
 		tw.Flush()
 
-		time.Sleep(10 * time.Second)
+		time.Sleep(2 * time.Second)
 	}
 }

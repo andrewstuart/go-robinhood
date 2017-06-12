@@ -6,14 +6,14 @@ import (
 )
 
 type Quote struct {
-	AdjustedPreviousClose       string  `json:"adjusted_previous_close"`
-	AskPrice                    string  `json:"ask_price"`
+	AdjustedPreviousClose       float64 `json:"adjusted_previous_close,string"`
+	AskPrice                    float64 `json:"ask_price,string"`
 	AskSize                     int     `json:"ask_size"`
-	BidPrice                    string  `json:"bid_price"`
+	BidPrice                    float64 `json:"bid_price,string"`
 	BidSize                     int     `json:"bid_size"`
-	LastExtendedHoursTradePrice *string `json:"last_extended_hours_trade_price"`
-	LastTradePrice              string  `json:"last_trade_price"`
-	PreviousClose               string  `json:"previous_close"`
+	LastExtendedHoursTradePrice float64 `json:"last_extended_hours_trade_price,string"`
+	LastTradePrice              float64 `json:"last_trade_price,string"`
+	PreviousClose               float64 `json:"previous_close,string"`
 	PreviousCloseDate           string  `json:"previous_close_date"`
 	Symbol                      string  `json:"symbol"`
 	TradingHalted               bool    `json:"trading_halted"`
