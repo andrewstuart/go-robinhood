@@ -1,4 +1,4 @@
-package main
+package robinhood
 
 import (
 	"encoding/json"
