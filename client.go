@@ -1,10 +1,7 @@
 package robinhood
 
 import (
-	"encoding/json"
 	"net/http"
-	"net/url"
-	"strings"
 	"time"
 
 	"astuart.co/clyde"
@@ -18,38 +15,22 @@ const (
 	epPortfolios = epBase + "portfolios/"
 )
 
-type Creds struct {
-	Username, Password string
-}
-
-func (c Creds) Values() url.Values {
-	return url.Values{
-		"username": []string{c.Username},
-		"password": []string{c.Password},
-	}
-}
-
 type Client struct {
 	Token   string
 	Account *Account
 	*http.Client
 }
 
-func Dial(c Creds) (*Client, error) {
-	res, err := http.Post(epLogin, "application/x-www-form-urlencoded", strings.NewReader(c.Values().Encode()))
+func Dial(t TokenGetter) (*Client, error) {
+	tkn, err := t.GetToken()
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
 
-	var cli Client
-	err = json.NewDecoder(res.Body).Decode(&cli)
-
-	cli.Client = &http.Client{
-		Transport: clyde.HeaderRoundTripper{"Authorization": "Token " + cli.Token},
-	}
-
-	return &cli, err
+	return &Client{
+		Token:  tkn,
+		Client: &http.Client{Transport: clyde.HeaderRoundTripper{"Authorization": "Token " + tkn}},
+	}, nil
 }
 
 type Meta struct {
