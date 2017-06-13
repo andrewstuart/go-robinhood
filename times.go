@@ -2,48 +2,41 @@ package robinhood
 
 import "time"
 
-// const (
-// 	am = 0
-// 	pm = 1
-// )
-
-// type timeOfDay struct {
-// 	Hour, Minute, Meridian int
-// }
-
-// func (t timeOfDay) minute() int {
-// 	return (t.Meridian*12+t.Hour)*60 + t.Minute
-// }
-
-// func tdFromTime(t time.Time) timeOfDay {
-// 	return td{time.Hour % 12, time.Minute, time.Hour / 12}
-// }
-
-//
+// Common constants for hours and minutes from midnight at which market events
+// occur.
 const (
-	MinExtendedOpen    = 4 * 60
-	MinRHExtendedOpen  = 9 * 60
+	HrExtendedOpen    = 4
+	HrRHExtendedOpen  = 9
+	HrClose           = 12 + 4
+	HrRHExtendedClose = 12 + 6
+	HrExtendedClose   = 12 + 8
+
+	MinExtendedOpen    = HrExtendedOpen * 60
+	MinRHExtendedOpen  = HrRHExtendedOpen * 60
 	MinOpen            = 9*60 + 30
-	MinClose           = 16 * 60
-	MinRHExtendedClose = 18 * 60
-	MinExtendedClose   = 20 * 60
+	MinClose           = HrClose * 60
+	MinRHExtendedClose = HrRHExtendedClose * 60
+	MinExtendedClose   = HrExtendedClose * 60
 )
 
 // MinuteOfDay returns the minute of the day for a given time.Time (hr * 60 +
-// min)
+// min).
 func MinuteOfDay(t time.Time) int {
 	return t.Hour()*60 + t.Minute()
 }
 
+// nyLoc returns the *time.Location of New_York.
 func nyLoc() *time.Location {
 	et, _ := time.LoadLocation("America/New_York")
 	return et
 }
 
+// nyMinute returns the current minute after midnight in New_York.
 func nyMinute() int {
 	return MinuteOfDay(time.Now().In(nyLoc()))
 }
 
+// isWeekday returns whether or not the given time.Time is a weekday.
 func isWeekday(t time.Time) bool {
 	wd := t.Weekday()
 	return wd != time.Saturday && wd != time.Sunday
@@ -55,7 +48,7 @@ func IsWeekDay(t time.Time) bool {
 	return isWeekday(time.Now())
 }
 
-// NextWeekday returns the next weekday
+// NextWeekday returns the next weekday.
 func NextWeekday() time.Time {
 	d := time.Now().AddDate(0, 0, 1)
 	for !isWeekday(d) {
@@ -85,7 +78,8 @@ func IsExtendedTradingTime() bool {
 	return MinExtendedOpen <= now && now < MinExtendedClose
 }
 
-func nextDayHourDateNY(h, m int) time.Time {
+// nextWeekdayHourMinuteNY returns the time.Time of the next h/m occurrence on a weekday in New York.
+func nextWeekdayHourMinuteNY(h, m int) time.Time {
 	now := time.Now()
 
 	if h*60+m <= MinuteOfDay(now) {
@@ -98,36 +92,36 @@ func nextDayHourDateNY(h, m int) time.Time {
 // NextMarketOpen returns the time of the next opening bell, when regular
 // trading begins.
 func NextMarketOpen() time.Time {
-	return nextDayHourDateNY(9, 30)
+	return nextWeekdayHourMinuteNY(9, 30)
 }
 
 // NextMarketExtendedOpen returns the time of the next extended opening time,
 // when stock equity may begin to fluctuate again.
 func NextMarketExtendedOpen() time.Time {
-	return nextDayHourDateNY(4, 00)
+	return nextWeekdayHourMinuteNY(HrExtendedOpen, 00)
 }
 
 // NextRobinhoodExtendedOpen returns the time of the next robinhood extended
 // opening time, when robinhood users can make trades.
 func NextRobinhoodExtendedOpen() time.Time {
-	return nextDayHourDateNY(9, 00)
+	return nextWeekdayHourMinuteNY(HrRHExtendedOpen, 00)
 }
 
 // NextMarketClose returns the time of the next market close.
 func NextMarketClose() time.Time {
-	return nextDayHourDateNY(12+4, 00)
+	return nextWeekdayHourMinuteNY(HrClose, 00)
 }
 
 // NextRobinhoodExtendedClose returns the time of the next robinhood extended
 // closing time, when robinhood users must place their last extended-hours
 // trade.
 func NextRobinhoodExtendedClose() time.Time {
-	return nextDayHourDateNY(12+6, 00)
+	return nextWeekdayHourMinuteNY(HrRHExtendedClose, 00)
 }
 
 // NextMarketExtendedClose returns the time of the next extended market close,
 // when stock equity numbers will stop being updated until the next extended
 // open.
 func NextMarketExtendedClose() time.Time {
-	return nextDayHourDateNY(12+8, 00)
+	return nextWeekdayHourMinuteNY(HrRHExtendedClose, 00)
 }
