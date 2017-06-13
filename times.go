@@ -21,12 +21,12 @@ import "time"
 
 //
 const (
-	ExtendedOpen    = 4 * 60
-	RHExtendedOpen  = 9 * 60
-	OpenMinute      = 9*60 + 30
-	CloseMinute     = 16 * 60
-	RHExtendedClose = 18 * 60
-	ExtendedClose   = 20 * 60
+	MinExtendedOpen    = 4 * 60
+	MinRHExtendedOpen  = 9 * 60
+	MinOpen            = 9*60 + 30
+	MinClose           = 16 * 60
+	MinRHExtendedClose = 18 * 60
+	MinExtendedClose   = 20 * 60
 )
 
 // MinuteOfDay returns the minute of the day for a given time.Time (hr * 60 +
@@ -68,21 +68,21 @@ func NextWeekday() time.Time {
 // for regular trading.
 func IsRegularTradingTime() bool {
 	now := nyMinute()
-	return OpenMinute <= now && now < CloseMinute
+	return MinOpen <= now && now < MinClose
 }
 
 // IsRobinhoodExtendedTradingTime returns whether or not trades can still be
 // placed during the robinhood gold extended trading hours.
 func IsRobinhoodExtendedTradingTime() bool {
 	now := nyMinute()
-	return RHExtendedOpen <= now && now < RHExtendedClose
+	return MinRHExtendedOpen <= now && now < MinRHExtendedClose
 }
 
 // IsExtendedTradingTime returns whether or not extended hours equity will be
 // updated because extended-hours trades may still be allowed in the markets.
 func IsExtendedTradingTime() bool {
 	now := nyMinute()
-	return ExtendedOpen <= now && now < ExtendedClose
+	return MinExtendedOpen <= now && now < MinExtendedClose
 }
 
 func nextDayHourDateNY(h, m int) time.Time {
