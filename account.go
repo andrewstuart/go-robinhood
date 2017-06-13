@@ -1,9 +1,5 @@
 package robinhood
 
-import (
-	"encoding/json"
-)
-
 type Account struct {
 	Meta
 	AccountNumber              string         `json:"account_number"`
@@ -59,13 +55,9 @@ type MarginBalances struct {
 
 func (c *Client) GetAccounts() ([]Account, error) {
 	var r struct{ Results []Account }
-	res, err := c.Get(epAccounts)
+	err := c.GetAndDecode(epAccounts, &r)
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
-
-	err = json.NewDecoder(res.Body).Decode(&r)
-
 	return r.Results, err
 }

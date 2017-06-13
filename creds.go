@@ -42,8 +42,8 @@ func (c Creds) Values() url.Values {
 // from the RobinHood API will be cached at the file path, and a new token will
 // not be obtained.
 type CredsCacher struct {
-	Creds
-	Path string
+	Creds TokenGetter
+	Path  string
 }
 
 // GetToken implements TokenGetter. It may fail if an error is encountered

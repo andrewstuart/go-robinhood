@@ -1,10 +1,11 @@
 package robinhood
 
 import (
-	"encoding/json"
 	"strings"
 )
 
+// A Quote is a representation of the data returned by the Robinhood API for
+// current stock quotes
 type Quote struct {
 	AdjustedPreviousClose       float64 `json:"adjusted_previous_close,string"`
 	AskPrice                    float64 `json:"ask_price,string"`
@@ -20,16 +21,10 @@ type Quote struct {
 	UpdatedAt                   string  `json:"updated_at"`
 }
 
+// GetQuote returns all the latest stock quotes for the list of stocks provided
 func (c Client) GetQuote(stocks ...string) ([]Quote, error) {
 	url := epQuotes + "?symbols=" + strings.Join(stocks, ",")
-	res, err := c.Get(url)
-	if err != nil {
-		return nil, err
-	}
-	defer res.Body.Close()
-
 	var r struct{ Results []Quote }
-
-	err = json.NewDecoder(res.Body).Decode(&r)
+	err := c.GetAndDecode(url, &r)
 	return r.Results, err
 }

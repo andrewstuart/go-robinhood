@@ -1,9 +1,5 @@
 package robinhood
 
-import (
-	"encoding/json"
-)
-
 type Portfolio struct {
 	Account                                string  `json:"account"`
 	AdjustedEquityPreviousClose            float64 `json:"adjusted_equity_previous_close,string"`
@@ -25,25 +21,10 @@ type Portfolio struct {
 	WithdrawableAmount                     float64 `json:"withdrawable_amount,string"`
 }
 
-func (c *Client) GetPortfolios(acc *Account) ([]Portfolio, error) {
-	ep := epPortfolios
-	if acc != nil {
-		ep = acc.Portfolio
-	}
-
-	res, err := c.Get(ep)
-	if err != nil {
-		return nil, err
-	}
-	defer res.Body.Close()
-
-	if acc == nil {
-		var p struct{ Results []Portfolio }
-		err = json.NewDecoder(res.Body).Decode(&p)
-		return p.Results, err
-	}
-
-	var p Portfolio
-	err = json.NewDecoder(res.Body).Decode(&p)
-	return []Portfolio{p}, err
+// GetPortfolios returns all the portfolios associated with a client's
+// credentials and accounts
+func (c *Client) GetPortfolios() ([]Portfolio, error) {
+	var p struct{ Results []Portfolio }
+	err := c.GetAndDecode(epPortfolios, &p)
+	return p.Results, err
 }

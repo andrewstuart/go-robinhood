@@ -1,7 +1,6 @@
 package robinhood
 
 import (
-	"encoding/json"
 	"sync"
 )
 
@@ -17,42 +16,33 @@ type Watchlist struct {
 
 // GetWatchlists retrieves the watchlists for a given set of credentials/accounts.
 func (c *Client) GetWatchlists() ([]Watchlist, error) {
-	res, err := c.Get(epBase + "watchlists/")
+	var r struct{ Results []Watchlist }
+	err := c.GetAndDecode(epWatchlists, &r)
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
-
-	var r struct{ Results []Watchlist }
-	err = json.NewDecoder(res.Body).Decode(&r)
 	if r.Results != nil {
 		for i := range r.Results {
 			r.Results[i].Client = c
 		}
 	}
-	return r.Results, err
+	return r.Results, nil
 }
 
 // GetInstruments returns the list of Instruments associated with a Watchlist.
 func (w *Watchlist) GetInstruments() ([]Instrument, error) {
-	res, err := w.Client.Get(w.URL)
-	if err != nil {
-		return nil, err
-	}
-	defer res.Body.Close()
-
 	var r struct {
 		Results []struct {
 			Instrument, URL string
 		}
 	}
 
-	err = json.NewDecoder(res.Body).Decode(&r)
+	err := w.Client.GetAndDecode(w.URL, &r)
 	if err != nil {
 		return nil, err
 	}
 
-	insts := make([]Instrument, len(r.Results))
+	insts := make([]*Instrument, len(r.Results))
 	wg := &sync.WaitGroup{}
 	wg.Add(len(r.Results))
 
@@ -60,15 +50,7 @@ func (w *Watchlist) GetInstruments() ([]Instrument, error) {
 		go func(i int) {
 			defer wg.Done()
 
-			url := r.Results[i].Instrument
-			res, err := w.Client.Get(url)
-			if err != nil {
-				return
-			}
-			defer res.Body.Close()
-
-			var inst Instrument
-			err = json.NewDecoder(res.Body).Decode(&inst)
+			inst, err := w.Client.GetInstrument(r.Results[i].Instrument)
 			if err != nil {
 				return
 			}
@@ -82,10 +64,8 @@ func (w *Watchlist) GetInstruments() ([]Instrument, error) {
 	// Filter slice for empties (if error)
 	retInsts := []Instrument{}
 	for _, inst := range insts {
-		if (inst != Instrument{}) {
-		}
-		{
-			retInsts = append(retInsts, inst)
+		if inst != nil {
+			retInsts = append(retInsts, *inst)
 		}
 	}
 

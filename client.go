@@ -1,6 +1,7 @@
 package robinhood
 
 import (
+	"encoding/json"
 	"net/http"
 	"time"
 
@@ -8,11 +9,13 @@ import (
 )
 
 const (
-	epBase       = "https://api.robinhood.com/"
-	epLogin      = epBase + "api-token-auth/"
-	epAccounts   = epBase + "accounts/"
-	epQuotes     = epBase + "quotes/"
-	epPortfolios = epBase + "portfolios/"
+	epBase        = "https://api.robinhood.com/"
+	epLogin       = epBase + "api-token-auth/"
+	epAccounts    = epBase + "accounts/"
+	epQuotes      = epBase + "quotes/"
+	epPortfolios  = epBase + "portfolios/"
+	epWatchlists  = epBase + "watchlists/"
+	epInstruments = epBase + "instruments/"
 )
 
 type Client struct {
@@ -31,6 +34,16 @@ func Dial(t TokenGetter) (*Client, error) {
 		Token:  tkn,
 		Client: &http.Client{Transport: clyde.HeaderRoundTripper{"Authorization": "Token " + tkn}},
 	}, nil
+}
+
+func (c Client) GetAndDecode(url string, dest interface{}) error {
+	res, err := c.Get(url)
+	if err != nil {
+		return err
+	}
+	defer res.Body.Close()
+
+	return json.NewDecoder(res.Body).Decode(dest)
 }
 
 type Meta struct {

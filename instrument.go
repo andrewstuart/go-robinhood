@@ -1,7 +1,5 @@
 package robinhood
 
-import "encoding/json"
-
 type Instrument struct {
 	BloombergUnique    string      `json:"bloomberg_unique"`
 	Country            string      `json:"country"`
@@ -24,13 +22,13 @@ type Instrument struct {
 }
 
 func (c Client) GetInstrument(instURL string) (*Instrument, error) {
-	res, err := c.Get(instURL)
-	if err != nil {
-		return nil, err
-	}
-	defer res.Body.Close()
-
 	var i Instrument
-	err = json.NewDecoder(res.Body).Decode(&i)
+	err := c.GetAndDecode(instURL, &i)
+	return &i, err
+}
+
+func (c Client) GetInstrumentForSymbol(sym string) (*Instrument, error) {
+	var i Instrument
+	err := c.GetAndDecode(epInstruments+"?symbol="+sym, &i)
 	return &i, err
 }

@@ -1,9 +1,5 @@
 package robinhood
 
-import (
-	"encoding/json"
-)
-
 type Position struct {
 	Meta
 	Account                 string  `json:"account"`
@@ -16,15 +12,9 @@ type Position struct {
 	SharesHeldForSells      float64 `json:"shares_held_for_sells,string"`
 }
 
+// GetPositions returns all the positions associated with an account.
 func (c Client) GetPositions(a Account) ([]Position, error) {
-	res, err := c.Get(a.Positions)
-	if err != nil {
-		return nil, err
-	}
-	defer res.Body.Close()
-
 	var r struct{ Results []Position }
-	err = json.NewDecoder(res.Body).Decode(&r)
-
+	err := c.GetAndDecode(a.Positions, &r)
 	return r.Results, err
 }
