@@ -15,8 +15,8 @@ type Watchlist struct {
 	Client *Client `json:",ignore"`
 }
 
-// Watchlists retrieves the watchlists for a given set of credentials/accounts.
-func (c *Client) Watchlists() ([]Watchlist, error) {
+// GetWatchlists retrieves the watchlists for a given set of credentials/accounts.
+func (c *Client) GetWatchlists() ([]Watchlist, error) {
 	res, err := c.Get(epBase + "watchlists/")
 	if err != nil {
 		return nil, err
