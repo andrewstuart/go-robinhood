@@ -107,7 +107,27 @@ func NextMarketExtendedOpen() time.Time {
 	return nextDayHourDateNY(4, 00)
 }
 
-// NextRobinhoodExtendedOpen returns the time of the next extended
+// NextRobinhoodExtendedOpen returns the time of the next robinhood extended
+// opening time, when robinhood users can make trades.
 func NextRobinhoodExtendedOpen() time.Time {
 	return nextDayHourDateNY(9, 00)
+}
+
+// NextMarketClose returns the time of the next market close.
+func NextMarketClose() time.Time {
+	return nextDayHourDateNY(12+4, 00)
+}
+
+// NextRobinhoodExtendedClose returns the time of the next robinhood extended
+// closing time, when robinhood users must place their last extended-hours
+// trade.
+func NextRobinhoodExtendedClose() time.Time {
+	return nextDayHourDateNY(12+6, 00)
+}
+
+// NextMarketExtendedClose returns the time of the next extended market close,
+// when stock equity numbers will stop being updated until the next extended
+// open.
+func NextMarketExtendedClose() time.Time {
+	return nextDayHourDateNY(12+8, 00)
 }
