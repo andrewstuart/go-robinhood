@@ -82,6 +82,10 @@ func (c *CredsCacher) GetToken() (string, error) {
 		return "", err
 	}
 
+	if tok == "" {
+		return "", fmt.Errorf("Empty token")
+	}
+
 	_, err = f.Write([]byte(tok))
 	return tok, err
 }
