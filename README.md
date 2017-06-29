@@ -1,5 +1,6 @@
-# robinhood
 [![GoDoc](https://godoc.org/astuart.co/go-robinhood?status.svg)](https://godoc.org/astuart.co/go-robinhood)
+
+# robinhood
 --
     import "astuart.co/go-robinhood"
 
