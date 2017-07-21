@@ -28,3 +28,11 @@ func (c Client) GetQuote(stocks ...string) ([]Quote, error) {
 	err := c.GetAndDecode(url, &r)
 	return r.Results, err
 }
+
+// Price returns the proper stock price even after hours
+func (q Quote) Price() float64 {
+	if IsRegularTradingTime() {
+		return q.LastTradePrice
+	}
+	return q.LastExtendedHoursTradePrice
+}
