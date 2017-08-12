@@ -17,6 +17,7 @@ type Fundamental struct {
 	Instrument    string  `json:"instrument"`
 }
 
+// GetFundamentals returns fundemental data for the list of stocks provided.
 func (c Client) GetFundamentals(stocks ...string) ([]Fundamental, error) {
 	url := epFundamentals + "?symbols=" + strings.Join(stocks, ",")
 	var r struct{ Results []Fundamental }
