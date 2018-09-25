@@ -47,6 +47,16 @@ func (c Client) GetAndDecode(url string, dest interface{}) error {
 	return json.NewDecoder(res.Body).Decode(dest)
 }
 
+func (c Client) DoAndDecode(req *http.Request, dest interface{}) error {
+	res, err := c.Do(req)
+	if err != nil {
+		return err
+	}
+	defer res.Body.Close()
+
+	return json.NewDecoder(res.Body).Decode(dest)
+}
+
 type Meta struct {
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
