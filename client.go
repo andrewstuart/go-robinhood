@@ -22,12 +22,16 @@ const (
 	epOrders       = epBase + "orders/"
 )
 
+// A Client is a helpful abstraction around some common metadata required for
+// API operations.
 type Client struct {
 	Token   string
 	Account *Account
 	*http.Client
 }
 
+// Dial returns a client given a TokenGetter. TokenGetter implementations are
+// available in this package, including a Cookie-based cache.
 func Dial(t TokenGetter) (*Client, error) {
 	tkn, err := t.GetToken()
 	if err != nil {
@@ -47,14 +51,15 @@ func Dial(t TokenGetter) (*Client, error) {
 	return c, nil
 }
 
+// GetAndDecode retrieves from the endpoint and unmarshals resulting json into
+// the provided destination interface, which must be a pointer.
 func (c Client) GetAndDecode(url string, dest interface{}) error {
-	res, err := c.Get(url)
+	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return err
 	}
-	defer res.Body.Close()
 
-	return json.NewDecoder(res.Body).Decode(dest)
+	return c.DoAndDecode(req)
 }
 
 // ErrorMap encapsulates the helpful error messages returned by the API server
@@ -68,6 +73,8 @@ func (e ErrorMap) Error() string {
 	return "Error returned from API: " + strings.Join(es, ", ")
 }
 
+// DoAndDecode provides useful abstractions around common errors and decoding
+// issues.
 func (c Client) DoAndDecode(req *http.Request, dest interface{}) error {
 	res, err := c.Do(req)
 	if err != nil {
@@ -87,6 +94,7 @@ func (c Client) DoAndDecode(req *http.Request, dest interface{}) error {
 	return json.NewDecoder(res.Body).Decode(dest)
 }
 
+// Meta holds metadata common to many RobinHood types.
 type Meta struct {
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`

@@ -97,6 +97,7 @@ func (c *Client) Order(i *Instrument, o OrderOpts) (*OrderOutput, error) {
 
 // OrderOutput is the response from the Order api
 type OrderOutput struct {
+	Meta
 	Account                string   `json:"account"`
 	AveragePrice           float64  `json:"average_price"`
 	CancelURL              string   `json:"cancel"`
@@ -120,8 +121,6 @@ type OrderOutput struct {
 	TimeInForce            string   `json:"time_in_force"`
 	Trigger                string   `json:"trigger"`
 	Type                   string   `json:"type"`
-	UpdatedAt              string   `json:"updated_at"`
-	URL                    string   `json:"url"`
 
 	client *Client
 }

@@ -1,5 +1,6 @@
 package robinhood
 
+// Account holds the basic account details relevant to the RobinHood API
 type Account struct {
 	Meta
 	AccountNumber              string         `json:"account_number"`
@@ -25,6 +26,7 @@ type Account struct {
 	WithdrawalHalted           bool           `json:"withdrawal_halted"`
 }
 
+// CashBalances reflect the amount of cash available
 type CashBalances struct {
 	Meta
 	BuyingPower                float64 `json:"buying_power,string"`
@@ -35,6 +37,7 @@ type CashBalances struct {
 	UnsettledFunds             float64 `json:"unsettled_funds,string"`
 }
 
+// MarginBalances reflect the balance available in margin accounts
 type MarginBalances struct {
 	Meta
 	Cash                              float64 `json:"cash,string"`
@@ -53,6 +56,7 @@ type MarginBalances struct {
 	UnsettledFunds                    float64 `json:"unsettled_funds,string"`
 }
 
+// GetAccounts returns all the accounts associated with a login/client.
 func (c *Client) GetAccounts() ([]Account, error) {
 	var r struct{ Results []Account }
 	err := c.GetAndDecode(epAccounts, &r)
