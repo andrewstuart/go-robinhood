@@ -4,20 +4,18 @@ import (
 	"fmt"
 	"log"
 	"os"
-
-	robinhood "astuart.co/go-robinhood"
 )
 
-func ExampleOrder() {
-	creds := robinhood.CredsCacher{
-		Creds: &robinhood.Creds{
+func ExampleClient_Order() {
+	creds := CredsCacher{
+		Creds: &Creds{
 			Username: "andrewstuart",
 			Password: os.Getenv("ROBINHOOD_PASSWORD"),
 		},
-		Path: "/home/andrewstuart/.config/myrh.token",
+		Path: "/home/andrew/.config/myrh.token",
 	}
 
-	c, err := robinhood.Dial(&creds)
+	c, err := Dial(&creds)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -27,10 +25,10 @@ func ExampleOrder() {
 		log.Fatal(err)
 	}
 
-	out, err := c.Order(i, robinhood.OrderOpts{
+	out, err := c.Order(i, OrderOpts{
 		Price:    100.0,
-		Type:     robinhood.Limit,
-		Side:     robinhood.Buy,
+		Type:     Limit,
+		Side:     Buy,
 		Quantity: 1,
 	})
 	if err != nil {
