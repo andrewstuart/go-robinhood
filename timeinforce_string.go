@@ -4,7 +4,7 @@ package robinhood
 
 import "strconv"
 
-const _TimeInForce_name = "GFDGTCIOCOPG"
+const _TimeInForce_name = "GTCGFDIOCOPG"
 
 var _TimeInForce_index = [...]uint8{0, 3, 6, 9, 12}
 

@@ -6,8 +6,8 @@ type TimeInForce int
 //go:generate stringer -type=TimeInForce
 // Well-known values for TimeInForce
 const (
-	GFD TimeInForce = iota
-	GTC
+	GTC TimeInForce = iota
+	GFD
 	IOC
 	OPG
 )

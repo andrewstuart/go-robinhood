@@ -2,6 +2,7 @@ package robinhood
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -17,6 +18,7 @@ const (
 	epWatchlists   = epBase + "watchlists/"
 	epInstruments  = epBase + "instruments/"
 	epFundamentals = epBase + "fundamentals/"
+	epOrders       = epBase + "orders/"
 )
 
 type Client struct {
@@ -60,6 +62,10 @@ func (c Client) DoAndDecode(req *http.Request, dest interface{}) error {
 		return err
 	}
 	defer res.Body.Close()
+
+	if res.StatusCode/100 != 2 {
+		return fmt.Errorf(res.Status)
+	}
 
 	return json.NewDecoder(res.Body).Decode(dest)
 }
