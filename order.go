@@ -125,6 +125,11 @@ type OrderOutput struct {
 	client *Client
 }
 
+// Update returns any errors and updates the item with any recent changes.
+func (o *OrderOutput) Update() error {
+	return o.client.GetAndDecode(o.URL, o)
+}
+
 // Cancel attempts to cancel an odrer
 func (o OrderOutput) Cancel() error {
 	post, err := http.NewRequest("POST", o.CancelURL, nil)

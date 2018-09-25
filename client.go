@@ -59,7 +59,7 @@ func (c Client) GetAndDecode(url string, dest interface{}) error {
 		return err
 	}
 
-	return c.DoAndDecode(req)
+	return c.DoAndDecode(req, dest)
 }
 
 // ErrorMap encapsulates the helpful error messages returned by the API server
