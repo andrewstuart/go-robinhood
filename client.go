@@ -21,6 +21,7 @@ const (
 	EPInstruments  = EPBase + "instruments/"
 	EPFundamentals = EPBase + "fundamentals/"
 	EPOrders       = EPBase + "orders/"
+	EPOptions      = EPBase + "options/"
 )
 
 // A Client is a helpful abstraction around some common metadata required for
