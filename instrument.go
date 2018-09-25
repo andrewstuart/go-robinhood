@@ -40,6 +40,6 @@ func (c Client) GetInstrumentForSymbol(sym string) (*Instrument, error) {
 	var i struct {
 		Results []Instrument
 	}
-	err := c.GetAndDecode(epInstruments+"?symbol="+sym, &i)
+	err := c.GetAndDecode(EPInstruments+"?symbol="+sym, &i)
 	return &i.Results[0], err
 }

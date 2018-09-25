@@ -25,6 +25,6 @@ type Portfolio struct {
 // credentials and accounts
 func (c *Client) GetPortfolios() ([]Portfolio, error) {
 	var p struct{ Results []Portfolio }
-	err := c.GetAndDecode(epPortfolios, &p)
+	err := c.GetAndDecode(EPPortfolios, &p)
 	return p.Results, err
 }

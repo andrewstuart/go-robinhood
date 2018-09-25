@@ -20,7 +20,7 @@ type Creds struct {
 }
 
 func (c *Creds) GetToken() (string, error) {
-	res, err := http.Post(epLogin, "application/x-www-form-urlencoded", strings.NewReader(c.Values().Encode()))
+	res, err := http.Post(EPLogin, "application/x-www-form-urlencoded", strings.NewReader(c.Values().Encode()))
 	if err != nil {
 		return "", err
 	}

@@ -23,7 +23,7 @@ type Quote struct {
 
 // GetQuote returns all the latest stock quotes for the list of stocks provided
 func (c Client) GetQuote(stocks ...string) ([]Quote, error) {
-	url := epQuotes + "?symbols=" + strings.Join(stocks, ",")
+	url := EPQuotes + "?symbols=" + strings.Join(stocks, ",")
 	var r struct{ Results []Quote }
 	err := c.GetAndDecode(url, &r)
 	return r.Results, err

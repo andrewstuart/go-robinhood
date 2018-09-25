@@ -59,7 +59,7 @@ type MarginBalances struct {
 // GetAccounts returns all the accounts associated with a login/client.
 func (c *Client) GetAccounts() ([]Account, error) {
 	var r struct{ Results []Account }
-	err := c.GetAndDecode(epAccounts, &r)
+	err := c.GetAndDecode(EPAccounts, &r)
 	if err != nil {
 		return nil, err
 	}

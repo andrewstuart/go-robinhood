@@ -10,16 +10,17 @@ import (
 	"astuart.co/clyde"
 )
 
+// Endpoints for the Robinhood API
 const (
-	epBase         = "https://api.robinhood.com/"
-	epLogin        = epBase + "api-token-auth/"
-	epAccounts     = epBase + "accounts/"
-	epQuotes       = epBase + "quotes/"
-	epPortfolios   = epBase + "portfolios/"
-	epWatchlists   = epBase + "watchlists/"
-	epInstruments  = epBase + "instruments/"
-	epFundamentals = epBase + "fundamentals/"
-	epOrders       = epBase + "orders/"
+	EPBase         = "https://api.robinhood.com/"
+	EPLogin        = EPBase + "api-token-auth/"
+	EPAccounts     = EPBase + "accounts/"
+	EPQuotes       = EPBase + "quotes/"
+	EPPortfolios   = EPBase + "portfolios/"
+	EPWatchlists   = EPBase + "watchlists/"
+	EPInstruments  = EPBase + "instruments/"
+	EPFundamentals = EPBase + "fundamentals/"
+	EPOrders       = EPBase + "orders/"
 )
 
 // A Client is a helpful abstraction around some common metadata required for

@@ -82,7 +82,7 @@ func (c *Client) Order(i *Instrument, o OrderOpts) (*OrderOutput, error) {
 		return nil, err
 	}
 
-	post, err := http.NewRequest("POST", epOrders, bytes.NewReader(bs))
+	post, err := http.NewRequest("POST", EPOrders, bytes.NewReader(bs))
 	post.Header.Add("Content-Type", "application/json")
 
 	var out OrderOutput

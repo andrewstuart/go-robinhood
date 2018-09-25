@@ -17,7 +17,7 @@ type Watchlist struct {
 // GetWatchlists retrieves the watchlists for a given set of credentials/accounts.
 func (c *Client) GetWatchlists() ([]Watchlist, error) {
 	var r struct{ Results []Watchlist }
-	err := c.GetAndDecode(epWatchlists, &r)
+	err := c.GetAndDecode(EPWatchlists, &r)
 	if err != nil {
 		return nil, err
 	}

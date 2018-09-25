@@ -19,7 +19,7 @@ type Fundamental struct {
 
 // GetFundamentals returns fundemental data for the list of stocks provided.
 func (c Client) GetFundamentals(stocks ...string) ([]Fundamental, error) {
-	url := epFundamentals + "?symbols=" + strings.Join(stocks, ",")
+	url := EPFundamentals + "?symbols=" + strings.Join(stocks, ",")
 	var r struct{ Results []Fundamental }
 	err := c.GetAndDecode(url, &r)
 	return r.Results, err
