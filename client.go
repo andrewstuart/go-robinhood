@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"astuart.co/clyde"
@@ -56,6 +57,17 @@ func (c Client) GetAndDecode(url string, dest interface{}) error {
 	return json.NewDecoder(res.Body).Decode(dest)
 }
 
+// ErrorMap encapsulates the helpful error messages returned by the API server
+type ErrorMap map[string]interface{}
+
+func (e ErrorMap) Error() string {
+	es := make([]string, 0, len(e))
+	for k, v := range e {
+		es = append(es, fmt.Sprintf("%s: %q", k, v))
+	}
+	return "Error returned from API: " + strings.Join(es, ", ")
+}
+
 func (c Client) DoAndDecode(req *http.Request, dest interface{}) error {
 	res, err := c.Do(req)
 	if err != nil {
@@ -64,7 +76,12 @@ func (c Client) DoAndDecode(req *http.Request, dest interface{}) error {
 	defer res.Body.Close()
 
 	if res.StatusCode/100 != 2 {
-		return fmt.Errorf(res.Status)
+		var e ErrorMap
+		err = json.NewDecoder(res.Body).Decode(&e)
+		if err != nil {
+			return fmt.Errorf("got response %q and could not decode error body", res.Status)
+		}
+		return e
 	}
 
 	return json.NewDecoder(res.Body).Decode(dest)
