@@ -148,3 +148,15 @@ func (o OrderOutput) Cancel() error {
 	}
 	return nil
 }
+
+// RecentOrders returns any recent orders made by this client.
+func (c Client) RecentOrders() ([]OrderOutput, error) {
+	var o struct {
+		Results []OrderOutput
+	}
+	err := c.GetAndDecode(EPOrders, &o)
+	if err != nil {
+		return nil, err
+	}
+	return o.Results, nil
+}
