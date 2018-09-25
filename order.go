@@ -98,29 +98,29 @@ func (c *Client) Order(i *Instrument, o OrderOpts) (*OrderOutput, error) {
 // OrderOutput is the response from the Order api
 type OrderOutput struct {
 	Meta
-	Account                string   `json:"account"`
-	AveragePrice           float64  `json:"average_price"`
-	CancelURL              string   `json:"cancel"`
-	CreatedAt              string   `json:"created_at"`
-	CumulativeQuantity     string   `json:"cumulative_quantity"`
-	Executions             []string `json:"executions"`
-	ExtendedHours          bool     `json:"extended_hours"`
-	Fees                   string   `json:"fees"`
-	ID                     string   `json:"id"`
-	Instrument             string   `json:"instrument"`
-	LastTransactionAt      string   `json:"last_transaction_at"`
-	OverrideDayTradeChecks bool     `json:"override_day_trade_checks"`
-	OverrideDtbpChecks     bool     `json:"override_dtbp_checks"`
-	Position               string   `json:"position"`
-	Price                  float64  `json:"price,string"`
-	Quantity               string   `json:"quantity"`
-	RejectReason           string   `json:"reject_reason"`
-	Side                   string   `json:"side"`
-	State                  string   `json:"state"`
-	StopPrice              float64  `json:"stop_price"`
-	TimeInForce            string   `json:"time_in_force"`
-	Trigger                string   `json:"trigger"`
-	Type                   string   `json:"type"`
+	Account                string        `json:"account"`
+	AveragePrice           float64       `json:"average_price,string"`
+	CancelURL              string        `json:"cancel"`
+	CreatedAt              string        `json:"created_at"`
+	CumulativeQuantity     string        `json:"cumulative_quantity"`
+	Executions             []interface{} `json:"executions"`
+	ExtendedHours          bool          `json:"extended_hours"`
+	Fees                   string        `json:"fees"`
+	ID                     string        `json:"id"`
+	Instrument             string        `json:"instrument"`
+	LastTransactionAt      string        `json:"last_transaction_at"`
+	OverrideDayTradeChecks bool          `json:"override_day_trade_checks"`
+	OverrideDtbpChecks     bool          `json:"override_dtbp_checks"`
+	Position               string        `json:"position"`
+	Price                  float64       `json:"price,string"`
+	Quantity               string        `json:"quantity"`
+	RejectReason           string        `json:"reject_reason"`
+	Side                   string        `json:"side"`
+	State                  string        `json:"state"`
+	StopPrice              float64       `json:"stop_price,string"`
+	TimeInForce            string        `json:"time_in_force"`
+	Trigger                string        `json:"trigger"`
+	Type                   string        `json:"type"`
 
 	client *Client
 }
@@ -150,7 +150,7 @@ func (o OrderOutput) Cancel() error {
 }
 
 // RecentOrders returns any recent orders made by this client.
-func (c Client) RecentOrders() ([]OrderOutput, error) {
+func (c *Client) RecentOrders() ([]OrderOutput, error) {
 	var o struct {
 		Results []OrderOutput
 	}
@@ -158,5 +158,10 @@ func (c Client) RecentOrders() ([]OrderOutput, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	for i := range o.Results {
+		o.Results[i].client = c
+	}
+
 	return o.Results, nil
 }

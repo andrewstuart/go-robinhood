@@ -7,15 +7,12 @@ import (
 )
 
 func ExampleClient_Order() {
-	creds := CredsCacher{
-		Creds: &Creds{
-			Username: "andrewstuart",
-			Password: os.Getenv("ROBINHOOD_PASSWORD"),
-		},
-		Path: "/home/andrew/.config/myrh.token",
+	creds := &Creds{
+		Username: "andrewstuart",
+		Password: os.Getenv("ROBINHOOD_PASSWORD"),
 	}
 
-	c, err := Dial(&creds)
+	c, err := Dial(creds)
 	if err != nil {
 		log.Fatal(err)
 	}
