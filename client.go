@@ -31,10 +31,17 @@ func Dial(t TokenGetter) (*Client, error) {
 		return nil, err
 	}
 
-	return &Client{
+	c := &Client{
 		Token:  tkn,
 		Client: &http.Client{Transport: clyde.HeaderRoundTripper{"Authorization": "Token " + tkn}},
-	}, nil
+	}
+
+	a, _ := c.GetAccounts()
+	if len(a) > 0 {
+		c.Account = &a[0]
+	}
+
+	return c, nil
 }
 
 func (c Client) GetAndDecode(url string, dest interface{}) error {
