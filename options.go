@@ -1,7 +1,10 @@
 package robinhood
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
+	"net/http"
 	"strings"
 )
 
@@ -96,4 +99,95 @@ func (o OptionQuote) OrderURL() string {
 
 func (o OptionQuote) OrderSymbol() string {
 	return o.ChainSymbol
+}
+
+type OptionLeg struct {
+	PositionEffect string    `json:"position_effect"`
+	Side           OrderSide `json:"side"`
+	RatioQuantity  int       `json:"ratio_quantity"`
+	Option         string    `json:"option"`
+}
+
+// OptionDirection is a type for whether an option order is opening or closing
+// an option position
+type OptionDirection int
+
+//go:generate stringer -type OptionDirection
+// The two directions
+const (
+	Debit OptionDirection = iota
+	Credit
+)
+
+type OptionsOrderOpts struct {
+	Quantity    float64
+	Price       float64
+	Direction   OptionDirection
+	TimeInForce TimeInForce
+	Type        OrderType
+	Side        OrderSide
+}
+
+type optionBody struct {
+	Account     string      `json:"account"`
+	Direction   string      `json:"direction"`
+	TimeInForce string      `json:"time_in_force"`
+	Legs        []OptionLeg `json:"legs"`
+	Type        string      `json:"type"`
+	Quantity    float64     `json:"quantity,string"`
+	ChainSymbol string      `json:"chain_symbol"`
+	ChainID     string      `json:"chain_id"`
+	Price       float64     `json:"price,string,omitempty"`
+}
+
+func (c *Client) OrderOptions(q *OptionQuote, o OptionsOrderOpts) (json.RawMessage, error) {
+	b := optionBody{
+		Account:     c.Account.URL,
+		Direction:   strings.ToLower(o.Direction.String()),
+		TimeInForce: strings.ToLower(o.TimeInForce.String()),
+		ChainSymbol: q.ChainSymbol,
+		ChainID:     q.ChainID,
+		Legs: []OptionLeg{{
+			Option:         q.URL,
+			RatioQuantity:  1,
+			Side:           o.Side,
+			PositionEffect: "open",
+		}},
+		Type:     strings.ToLower(o.Type.String()),
+		Quantity: o.Quantity,
+		Price:    o.Price,
+	}
+
+	if o.Side != Buy {
+		b.Legs[0].PositionEffect = "close"
+	}
+
+	bs, err := json.Marshal(b)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", EPOptions+"orders/", bytes.NewReader(bs))
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	var out json.RawMessage
+	err = c.DoAndDecode(req, &out)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *Client) GetOptionsOrders() (json.RawMessage, error) {
+	var o json.RawMessage
+	err := c.GetAndDecode(EPOptions+"orders/", &o)
+	if err != nil {
+		return nil, err
+	}
+
+	return o, nil
+
 }

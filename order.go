@@ -12,6 +12,10 @@ import (
 // OrderSide is which side of the trade an order is on
 type OrderSide int
 
+func (o OrderSide) MarshalJSON() ([]byte, error) {
+	return []byte("\"" + strings.ToLower(o.String()) + "\""), nil
+}
+
 //go:generate stringer -type OrderSide
 // Buy/Sell
 const (
@@ -41,17 +45,17 @@ type OrderOpts struct {
 }
 
 type apiOrder struct {
-	Account       string  `json:"account,omitempty"`
-	Instrument    string  `json:"instrument,omitempty"`
-	Symbol        string  `json:"symbol,omitempty"`
-	Type          string  `json:"type,omitempty"`
-	TimeInForce   string  `json:"time_in_force,omitempty"`
-	Trigger       string  `json:"trigger,omitempty"`
-	Price         float64 `json:"price,omitempty"`
-	StopPrice     float64 `json:"stop_price,omitempty"`
-	Quantity      uint64  `json:"quantity,omitempty"`
-	Side          string  `json:"side,omitempty"`
-	ExtendedHours bool    `json:"extended_hours,omitempty"`
+	Account       string    `json:"account,omitempty"`
+	Instrument    string    `json:"instrument,omitempty"`
+	Symbol        string    `json:"symbol,omitempty"`
+	Type          string    `json:"type,omitempty"`
+	TimeInForce   string    `json:"time_in_force,omitempty"`
+	Trigger       string    `json:"trigger,omitempty"`
+	Price         float64   `json:"price,omitempty"`
+	StopPrice     float64   `json:"stop_price,omitempty"`
+	Quantity      uint64    `json:"quantity,omitempty"`
+	Side          OrderSide `json:"side,omitempty"`
+	ExtendedHours bool      `json:"extended_hours,omitempty"`
 
 	OverrideDayTradeChecks bool `json:"override_day_trade_checks,omitempty"`
 	OverrideDtbpChecks     bool `json:"override_dtbp_checks,omitempty"`
@@ -62,8 +66,6 @@ type apiOrder struct {
 // 	OrderSymbol() string
 // }
 
-// func (c *Client) Order(i Orderable, o OrderOpts) (*OrderOutput, error) {
-
 // Order places an order for a given instrument
 func (c *Client) Order(i *Instrument, o OrderOpts) (*OrderOutput, error) {
 	a := apiOrder{
@@ -73,7 +75,7 @@ func (c *Client) Order(i *Instrument, o OrderOpts) (*OrderOutput, error) {
 		Type:          strings.ToLower(o.Type.String()),
 		TimeInForce:   strings.ToLower(o.TimeInForce.String()),
 		Quantity:      o.Quantity,
-		Side:          strings.ToLower(o.Side.String()),
+		Side:          o.Side,
 		ExtendedHours: o.ExtendedHours,
 		Price:         o.Price,
 		Trigger:       "immediate",
