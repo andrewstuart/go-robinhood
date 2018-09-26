@@ -6,8 +6,34 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"time"
+
+	"github.com/google/uuid"
 )
 
+const dateFormat = "2006-01-02"
+
+// Date is a specific json time format for dates only
+type Date struct {
+	time.Time
+}
+
+// MarshalJSON implements json.Marshaler
+func (d Date) MarshalJSON() ([]byte, error) {
+	return []byte(fmt.Sprintf(`"%s"`, d.Format(dateFormat))), nil
+}
+
+// UnmarshalJSON implements json.Unmarshaler
+func (d *Date) UnmarshalJSON(bs []byte) error {
+	t, err := time.Parse(dateFormat, strings.TrimSpace(string(bs)))
+	if err != nil {
+		return err
+	}
+	d.Time = t
+	return nil
+}
+
+// GetOptionChains returns options for the given instruments
 func (c *Client) GetOptionChains(is ...*Instrument) ([]*OptionChain, error) {
 	s := []string{}
 	for _, inst := range is {
@@ -28,35 +54,33 @@ func (c *Client) GetOptionChains(is ...*Instrument) ([]*OptionChain, error) {
 	return res.Results, nil
 }
 
+// OptionChain represents the data the RobinHood API holds behind options chains
 type OptionChain struct {
-	CanOpenPosition        bool                    `json:"can_open_position"`
-	CashComponent          interface{}             `json:"cash_component"`
-	ExpirationDates        []string                `json:"expiration_dates"`
-	ID                     string                  `json:"id"`
-	MinTicks               MinTicks                `json:"min_ticks"`
-	Symbol                 string                  `json:"symbol"`
-	TradeValueMultiplier   float64                 `json:"trade_value_multiplier,string"`
-	UnderlyingInstrumentss []UnderlyingInstruments `json:"underlying_instruments"`
+	CanOpenPosition       bool                   `json:"can_open_position"`
+	CashComponent         interface{}            `json:"cash_component"`
+	ExpirationDates       []string               `json:"expiration_dates"`
+	ID                    string                 `json:"id"`
+	MinTicks              MinTicks               `json:"min_ticks"`
+	Symbol                string                 `json:"symbol"`
+	TradeValueMultiplier  float64                `json:"trade_value_multiplier,string"`
+	UnderlyingInstruments []UnderlyingInstrument `json:"underlying_instruments"`
 
 	c *Client
 }
 
-// type OptionTradeType string
+// func (o *OptionChain) MarketData() type {
+// }
 
-const (
-	Call = "call"
-	Put  = "put"
-)
-
-func (o *OptionChain) Quote(tradeType string, dates ...string) ([]*OptionQuote, error) {
-	u := EPOptions + fmt.Sprintf(
-		"instruments/?chain_id=%s&expiration_dates=%s&state=active&tradability=tradable&type=%s",
+func (o *OptionChain) GetInstruments(tradeType string, dates ...string) ([]*OptionInstrument, error) {
+	u := fmt.Sprintf(
+		"%sinstruments/?chain_id=%s&expiration_dates=%s&state=active&tradability=tradable&type=%s",
+		EPOptions,
 		o.ID,
 		strings.Join(dates, ","),
 		tradeType,
 	)
 
-	var out struct{ Results []*OptionQuote }
+	var out struct{ Results []*OptionInstrument }
 	err := o.c.GetAndDecode(u, &out)
 	if err != nil {
 		return nil, err
@@ -64,19 +88,23 @@ func (o *OptionChain) Quote(tradeType string, dates ...string) ([]*OptionQuote, 
 	return out.Results, nil
 }
 
+// MinTicks probably is important.
 type MinTicks struct {
 	AboveTick   float64 `json:"above_tick,string"`
 	BelowTick   float64 `json:"below_tick,string"`
 	CutoffPrice float64 `json:"cutoff_price,string"`
 }
 
-type UnderlyingInstruments struct {
+// UnderlyingInstrument is the type that represents a link from an option back
+// to its standard financial instrument (stock)
+type UnderlyingInstrument struct {
 	ID         string `json:"id"`
 	Instrument string `json:"instrument"`
 	Quantity   int    `json:"quantity"`
 }
 
-type OptionQuote struct {
+// An OptionInstrument can have a quote
+type OptionInstrument struct {
 	ChainID        string   `json:"chain_id"`
 	ChainSymbol    string   `json:"chain_symbol"`
 	CreatedAt      string   `json:"created_at"`
@@ -91,26 +119,18 @@ type OptionQuote struct {
 	Type           string   `json:"type"`
 	UpdatedAt      string   `json:"updated_at"`
 	URL            string   `json:"url"`
-}
 
-func (o OptionQuote) OrderURL() string {
-	return o.URL
-}
-
-func (o OptionQuote) OrderSymbol() string {
-	return o.ChainSymbol
-}
-
-type OptionLeg struct {
-	PositionEffect string    `json:"position_effect"`
-	Side           OrderSide `json:"side"`
-	RatioQuantity  int       `json:"ratio_quantity"`
-	Option         string    `json:"option"`
+	c *Client
 }
 
 // OptionDirection is a type for whether an option order is opening or closing
 // an option position
 type OptionDirection int
+
+// MarshalJSON implements json.Marshaler
+func (o OptionDirection) MarshalJSON() ([]byte, error) {
+	return []byte(fmt.Sprintf("%q", strings.ToLower(o.String()))), nil
+}
 
 //go:generate stringer -type OptionDirection
 // The two directions
@@ -119,6 +139,7 @@ const (
 	Credit
 )
 
+// OptionsOrderOpts encapsulates common Options order choices
 type OptionsOrderOpts struct {
 	Quantity    float64
 	Price       float64
@@ -128,34 +149,46 @@ type OptionsOrderOpts struct {
 	Side        OrderSide
 }
 
-type optionBody struct {
-	Account     string      `json:"account"`
-	Direction   string      `json:"direction"`
-	TimeInForce string      `json:"time_in_force"`
-	Legs        []OptionLeg `json:"legs"`
-	Type        string      `json:"type"`
-	Quantity    float64     `json:"quantity,string"`
-	ChainSymbol string      `json:"chain_symbol"`
-	ChainID     string      `json:"chain_id"`
-	Price       float64     `json:"price,string,omitempty"`
+type optionInput struct {
+	Account                string          `json:"account"`
+	Direction              OptionDirection `json:"direction"`
+	Legs                   []Leg           `json:"legs"`
+	OverrideDayTradeChecks bool            `json:"override_day_trade_checks"`
+	OverrideDtbpChecks     bool            `json:"override_dtbp_checks"`
+	Price                  float64         `json:"price,string"`
+	Quantity               float64         `json:"quantity,string"`
+	RefID                  string          `json:"ref_id"`
+	TimeInForce            TimeInForce     `json:"time_in_force"`
+	Trigger                string          `json:"trigger"`
+	Type                   OrderType       `json:"type"`
 }
 
-func (c *Client) OrderOptions(q *OptionQuote, o OptionsOrderOpts) (json.RawMessage, error) {
-	b := optionBody{
+// A Leg is a single option contract that will be purchased as part of a single
+// order. Transactions! Lower Risk!
+type Leg struct {
+	Option         string    `json:"option"`
+	PositionEffect string    `json:"position_effect"`
+	RatioQuantity  float64   `json:"ratio_quantity,string"`
+	Side           OrderSide `json:"side"`
+}
+
+// OrderOptions places a new order for options
+func (c *Client) OrderOptions(q *OptionInstrument, o OptionsOrderOpts) (json.RawMessage, error) {
+	b := optionInput{
 		Account:     c.Account.URL,
-		Direction:   strings.ToLower(o.Direction.String()),
-		TimeInForce: strings.ToLower(o.TimeInForce.String()),
-		ChainSymbol: q.ChainSymbol,
-		ChainID:     q.ChainID,
-		Legs: []OptionLeg{{
+		Direction:   o.Direction,
+		TimeInForce: o.TimeInForce,
+		Legs: []Leg{{
 			Option:         q.URL,
 			RatioQuantity:  1,
 			Side:           o.Side,
 			PositionEffect: "open",
 		}},
-		Type:     strings.ToLower(o.Type.String()),
+		Trigger:  "immediate",
+		Type:     o.Type,
 		Quantity: o.Quantity,
 		Price:    o.Price,
+		RefID:    uuid.New().String(),
 	}
 
 	if o.Side != Buy {
@@ -181,6 +214,7 @@ func (c *Client) OrderOptions(q *OptionQuote, o OptionsOrderOpts) (json.RawMessa
 	return out, nil
 }
 
+// GetOptionsOrders returns all outstanding options orders
 func (c *Client) GetOptionsOrders() (json.RawMessage, error) {
 	var o json.RawMessage
 	err := c.GetAndDecode(EPOptions+"orders/", &o)

@@ -3,6 +3,7 @@ package robinhood
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -12,6 +13,7 @@ import (
 // OrderSide is which side of the trade an order is on
 type OrderSide int
 
+// MarshalJSON implements json.Marshaler
 func (o OrderSide) MarshalJSON() ([]byte, error) {
 	return []byte("\"" + strings.ToLower(o.String()) + "\""), nil
 }
@@ -25,6 +27,11 @@ const (
 
 // OrderType represents a Limit or Market order
 type OrderType int
+
+// MarshalJSON implements json.Marshaler
+func (o OrderType) MarshalJSON() ([]byte, error) {
+	return []byte(fmt.Sprintf("%q", strings.ToLower(o.String()))), nil
+}
 
 //go:generate stringer -type OrderType
 // Well-known order types. Default is Market.
