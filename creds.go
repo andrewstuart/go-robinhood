@@ -15,7 +15,6 @@ import (
 
 type TokenGetter interface {
 	GetToken() (string, error)
-	Refresh() (string, error)
 }
 
 // Creds are the typical Username/Password
@@ -69,10 +68,6 @@ type CredsCacher struct {
 	Path  string
 }
 
-func (c CredsCacher) Refresh() (string, error) {
-	return c.Creds.Refresh()
-}
-
 // GetToken implements TokenGetter. It may fail if an error is encountered
 // checking the file path provided, or if the underlying creds return an error
 // when retrieving their token.
@@ -121,8 +116,4 @@ type Token string
 
 func (t *Token) GetToken() (string, error) {
 	return string(*t), nil
-}
-
-func (t *Token) Refresh() (string, error) {
-	return t.GetToken()
 }

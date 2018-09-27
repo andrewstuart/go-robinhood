@@ -13,7 +13,7 @@ import (
 // Endpoints for the Robinhood API
 const (
 	EPBase         = "https://api.robinhood.com/"
-	EPLogin        = EPBase + "api-token-auth/"
+	EPLogin        = EPBase + "oauth2/token/"
 	EPAccounts     = EPBase + "accounts/"
 	EPQuotes       = EPBase + "quotes/"
 	EPPortfolios   = EPBase + "portfolios/"
@@ -22,6 +22,8 @@ const (
 	EPFundamentals = EPBase + "fundamentals/"
 	EPOrders       = EPBase + "orders/"
 	EPOptions      = EPBase + "options/"
+	EPMarket       = EPBase + "marketdat/"
+	EPOptionQuote  = EPMarket + "options/"
 )
 
 // A Client is a helpful abstraction around some common metadata required for
@@ -42,7 +44,7 @@ func Dial(t TokenGetter) (*Client, error) {
 
 	c := &Client{
 		Token:  tkn,
-		Client: &http.Client{Transport: clyde.HeaderRoundTripper{"Authorization": "Token " + tkn}},
+		Client: &http.Client{Transport: clyde.HeaderRoundTripper{"Authorization": "Bearer " + tkn}},
 	}
 
 	a, _ := c.GetAccounts()

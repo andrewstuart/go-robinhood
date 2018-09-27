@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strings"
 	"time"
+
+	"github.com/davecgh/go-spew/spew"
 )
 
 const dateFormat = "2006-01-02"
@@ -15,12 +17,12 @@ type Date struct {
 
 // MarshalJSON implements json.Marshaler
 func (d Date) MarshalJSON() ([]byte, error) {
-	return []byte(fmt.Sprintf(`"%s"`, d.Format(dateFormat))), nil
+	return []byte(fmt.Sprintf("%q", d.Format(dateFormat))), nil
 }
 
 // UnmarshalJSON implements json.Unmarshaler
 func (d *Date) UnmarshalJSON(bs []byte) error {
-	t, err := time.Parse(dateFormat, strings.TrimSpace(string(bs)))
+	t, err := time.Parse(dateFormat, strings.Trim(strings.TrimSpace(string(bs)), "\""))
 	if err != nil {
 		return err
 	}
@@ -115,4 +117,49 @@ type OptionInstrument struct {
 	URL            string   `json:"url"`
 
 	c *Client
+}
+
+type MarketData struct {
+	AdjustedMarkPrice   float64 `json:"adjusted_mark_price,string"`
+	AskPrice            float64 `json:"ask_price,string"`
+	AskSize             int     `json:"ask_size"`
+	BidPrice            float64 `json:"bid_price,string"`
+	BidSize             int     `json:"bid_size"`
+	BreakEvenPrice      float64 `json:"break_even_price,string"`
+	ChanceOfProfitLong  float64 `json:"chance_of_profit_long,string"`
+	ChanceOfProfitShort float64 `json:"chance_of_profit_short,string"`
+	Delta               float64 `json:"delta,string"`
+	Gamma               float64 `json:"gamma,string"`
+	HighPrice           float64 `json:"high_price,string"`
+	ImpliedVolatility   string  `json:"implied_volatility"`
+	Instrument          string  `json:"instrument"`
+	LastTradePrice      float64 `json:"last_trade_price,string"`
+	LastTradeSize       int     `json:"last_trade_size"`
+	LowPrice            float64 `json:"low_price,string"`
+	MarkPrice           float64 `json:"mark_price,string"`
+	OpenInterest        int     `json:"open_interest"`
+	PreviousCloseDate   Date    `json:"previous_close_date"`
+	PreviousClosePrice  float64 `json:"previous_close_price,string"`
+	Rho                 string  `json:"rho"`
+	Theta               string  `json:"theta"`
+	Vega                string  `json:"vega"`
+	Volume              int     `json:"volume"`
+}
+
+func (c *Client) MarketData(os ...*OptionInstrument) ([]MarketData, error) {
+	is := make([]string, len(os))
+
+	for i, o := range os {
+		is[i] = o.URL
+	}
+
+	var r struct{ Results []MarketData }
+	spew.Dump(EPOptionQuote + "?instruments=" + strings.Join(is, ","))
+	err := c.GetAndDecode(EPOptionQuote+"?instruments="+strings.Join(is, ","), &r)
+	if err != nil {
+		return nil, err
+	}
+
+	return r.Results, nil
+
 }
