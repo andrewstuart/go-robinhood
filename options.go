@@ -161,5 +161,4 @@ func (c *Client) MarketData(os ...*OptionInstrument) ([]MarketData, error) {
 	}
 
 	return r.Results, nil
-
 }

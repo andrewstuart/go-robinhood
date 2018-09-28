@@ -1,13 +1,14 @@
 package robinhood
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
 	"time"
 
-	"astuart.co/clyde"
+	"golang.org/x/oauth2"
 )
 
 // Endpoints for the Robinhood API
@@ -36,15 +37,9 @@ type Client struct {
 
 // Dial returns a client given a TokenGetter. TokenGetter implementations are
 // available in this package, including a Cookie-based cache.
-func Dial(t TokenGetter) (*Client, error) {
-	tkn, err := t.GetToken()
-	if err != nil {
-		return nil, err
-	}
-
+func Dial(s oauth2.TokenSource) (*Client, error) {
 	c := &Client{
-		Token:  tkn,
-		Client: &http.Client{Transport: clyde.HeaderRoundTripper{"Authorization": "Bearer " + tkn}},
+		Client: oauth2.NewClient(context.Background(), s),
 	}
 
 	a, _ := c.GetAccounts()

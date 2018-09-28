@@ -1,4 +1,4 @@
-package rhoauth
+package robinhood
 
 import (
 	"encoding/json"
@@ -7,7 +7,6 @@ import (
 	"strings"
 	"time"
 
-	robinhood "astuart.co/go-robinhood"
 	"github.com/pkg/errors"
 	"golang.org/x/oauth2"
 )
@@ -15,11 +14,12 @@ import (
 // DefaultClientID is used by the website.
 const DefaultClientID = "c82SH0WZOsabOXGP2sxqcj34FxkvfnWRZBKlBjFS"
 
-// Config is the type that contains u/p string
+// PasswordToken implements oauth2 using the robinhood implementation
 type PasswordToken struct {
 	ClientID, Username, Password string
 }
 
+// Token implements TokenSource
 func (p *PasswordToken) Token() (*oauth2.Token, error) {
 	v := url.Values{
 		"username": []string{p.Username},
@@ -31,7 +31,7 @@ func (p *PasswordToken) Token() (*oauth2.Token, error) {
 		cli = DefaultClientID
 	}
 
-	u, _ := url.Parse(robinhood.EPLogin)
+	u, _ := url.Parse(EPLogin)
 	q := u.Query()
 	q.Add("client_id", cli)
 	q.Add("grant_type", "password")

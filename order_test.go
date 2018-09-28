@@ -7,7 +7,7 @@ import (
 )
 
 func ExampleClient_Order() {
-	creds := &Creds{
+	creds := &PasswordToken{
 		Username: "andrewstuart",
 		Password: os.Getenv("ROBINHOOD_PASSWORD"),
 	}

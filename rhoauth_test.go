@@ -1,4 +1,4 @@
-package rhoauth
+package robinhood
 
 import (
 	"os"
