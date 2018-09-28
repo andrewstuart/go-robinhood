@@ -45,11 +45,11 @@ func (c *CredsCacher) Token() (*oauth2.Token, error) {
 			return nil, err
 		}
 
-		var o oauth2.Token
-		err = json.Unmarshal(bs, &o)
-
-		if o.Valid() {
-			return &o, err
+		if len(bs) > 0 {
+			var o oauth2.Token
+			if err := json.Unmarshal(bs, &o); err == nil && o.Valid() {
+				return &o, err
+			}
 		}
 	}
 

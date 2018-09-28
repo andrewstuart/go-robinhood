@@ -14,30 +14,34 @@ import (
 // DefaultClientID is used by the website.
 const DefaultClientID = "c82SH0WZOsabOXGP2sxqcj34FxkvfnWRZBKlBjFS"
 
-// PasswordToken implements oauth2 using the robinhood implementation
+// OAuth implements oauth2 using the robinhood implementation
 type OAuth struct {
-	ClientID, Username, Password string
+	Endpoint, ClientID, Username, Password string
 }
 
 // Token implements TokenSource
 func (p *OAuth) Token() (*oauth2.Token, error) {
-	v := url.Values{
-		"username": []string{p.Username},
-		"password": []string{p.Password},
+	ep := p.Endpoint
+	if ep == "" {
+		ep = EPLogin
 	}
 
-	cli := p.ClientID
-	if cli == "" {
-		cli = DefaultClientID
+	cliID := p.ClientID
+	if cliID == "" {
+		cliID = DefaultClientID
 	}
 
 	u, _ := url.Parse(EPLogin)
 	q := u.Query()
-	q.Add("client_id", cli)
+	q.Add("client_id", cliID)
 	q.Add("grant_type", "password")
 	q.Add("scope", "internal")
 	u.RawQuery = q.Encode()
 
+	v := url.Values{
+		"username": []string{p.Username},
+		"password": []string{p.Password},
+	}
 	req, err := http.NewRequest(
 		"POST",
 		u.String(),
