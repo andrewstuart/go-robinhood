@@ -15,12 +15,12 @@ import (
 const DefaultClientID = "c82SH0WZOsabOXGP2sxqcj34FxkvfnWRZBKlBjFS"
 
 // PasswordToken implements oauth2 using the robinhood implementation
-type PasswordToken struct {
+type OAuth struct {
 	ClientID, Username, Password string
 }
 
 // Token implements TokenSource
-func (p *PasswordToken) Token() (*oauth2.Token, error) {
+func (p *OAuth) Token() (*oauth2.Token, error) {
 	v := url.Values{
 		"username": []string{p.Username},
 		"password": []string{p.Password},

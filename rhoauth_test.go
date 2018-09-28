@@ -11,7 +11,7 @@ import (
 func TestOauthPassword(t *testing.T) {
 	asrt := assert.New(t)
 
-	o := PasswordToken{
+	o := OAuth{
 		Username: os.Getenv("ROBINHOOD_USERNAME"),
 		Password: os.Getenv("ROBINHOOD_PASSWORD"),
 	}
