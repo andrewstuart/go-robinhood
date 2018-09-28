@@ -1,9 +1,11 @@
 package robinhood
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"strings"
 	"time"
@@ -82,10 +84,11 @@ func (c Client) DoAndDecode(req *http.Request, dest interface{}) error {
 	defer res.Body.Close()
 
 	if res.StatusCode/100 != 2 {
+		b := &bytes.Buffer{}
 		var e ErrorMap
-		err = json.NewDecoder(res.Body).Decode(&e)
+		err = json.NewDecoder(io.TeeReader(res.Body, b)).Decode(&e)
 		if err != nil {
-			return fmt.Errorf("got response %q and could not decode error body", res.Status)
+			return fmt.Errorf("got response %q and could not decode error body %q", res.Status, b.String())
 		}
 		return e
 	}

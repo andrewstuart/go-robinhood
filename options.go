@@ -2,6 +2,7 @@ package robinhood
 
 import (
 	"fmt"
+	"net/url"
 	"strings"
 	"time"
 
@@ -146,6 +147,7 @@ type MarketData struct {
 	Volume              int     `json:"volume"`
 }
 
+// MarketData returns market data for all the listed Option instruments
 func (c *Client) MarketData(os ...*OptionInstrument) ([]MarketData, error) {
 	is := make([]string, len(os))
 
@@ -153,9 +155,18 @@ func (c *Client) MarketData(os ...*OptionInstrument) ([]MarketData, error) {
 		is[i] = o.URL
 	}
 
+	u, err := url.Parse(EPOptionQuote)
+	if err != nil {
+		return nil, shameWrap(err, "couldn't parse URL const EPOptionQuote")
+	}
+
+	instQuery := url.QueryEscape(strings.Join(is, ","))
+	q := u.Query()
+	q.Add("instruments", instQuery)
+
 	var r struct{ Results []MarketData }
-	spew.Dump(EPOptionQuote + "?instruments=" + strings.Join(is, ","))
-	err := c.GetAndDecode(EPOptionQuote+"?instruments="+strings.Join(is, ","), &r)
+	spew.Dump(instQuery)
+	err = c.GetAndDecode(EPOptionQuote+"?instruments="+instQuery, &r)
 	if err != nil {
 		return nil, err
 	}
