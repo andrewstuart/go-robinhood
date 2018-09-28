@@ -4,6 +4,11 @@
 
 > Even though robinhood makes me poor
 
+## Notice
+
+If you have used this library before, and use credential caching, you will need
+to remove any credential cache and rebuild if you experience errors.
+
 ## General usage
 
 ```go
