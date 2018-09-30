@@ -160,13 +160,13 @@ func (c *Client) MarketData(os ...*OptionInstrument) ([]MarketData, error) {
 		return nil, shameWrap(err, "couldn't parse URL const EPOptionQuote")
 	}
 
-	instQuery := url.QueryEscape(strings.Join(is, ","))
 	q := u.Query()
-	q.Add("instruments", instQuery)
+	q.Add("instruments", strings.Join(is, ","))
+	u.RawQuery = q.Encode()
 
 	var r struct{ Results []MarketData }
-	spew.Dump(instQuery)
-	err = c.GetAndDecode(EPOptionQuote+"?instruments="+instQuery, &r)
+	spew.Dump(u.String())
+	err = c.GetAndDecode(u.String(), &r)
 	if err != nil {
 		return nil, err
 	}

@@ -2,6 +2,7 @@ package robinhood
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/url"
 	"strings"
@@ -33,6 +34,7 @@ func (p *OAuth) Token() (*oauth2.Token, error) {
 
 	u, _ := url.Parse(EPLogin)
 	q := u.Query()
+	q.Add("expires_in", fmt.Sprint(24*time.Hour/time.Second))
 	q.Add("client_id", cliID)
 	q.Add("grant_type", "password")
 	q.Add("scope", "internal")
