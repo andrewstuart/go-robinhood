@@ -5,11 +5,21 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"os/user"
 	"path"
 	"strings"
 
 	"golang.org/x/oauth2"
 )
+
+var defaultPath = ""
+
+func init() {
+	u, err := user.Current()
+	if err == nil {
+		defaultPath = path.Join(u.HomeDir, ".config", "robinhood.token")
+	}
+}
 
 // A CredsCacher takes user credentials and a file path. The token obtained
 // from the RobinHood API will be cached at the file path, and a new token will
@@ -23,6 +33,10 @@ type CredsCacher struct {
 // checking the file path provided, or if the underlying creds return an error
 // when retrieving their token.
 func (c *CredsCacher) Token() (*oauth2.Token, error) {
+	if c.Path == "" {
+		c.Path = defaultPath
+	}
+
 	mustLogin := false
 
 	err := os.MkdirAll(path.Dir(c.Path), 0750)

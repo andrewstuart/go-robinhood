@@ -16,9 +16,13 @@ type Date struct {
 	time.Time
 }
 
+func (d Date) String() string {
+	return d.Format(dateFormat)
+}
+
 // MarshalJSON implements json.Marshaler
 func (d Date) MarshalJSON() ([]byte, error) {
-	return []byte(fmt.Sprintf("%q", d.Format(dateFormat))), nil
+	return []byte("\"" + d.String() + "\""), nil
 }
 
 // UnmarshalJSON implements json.Unmarshaler
@@ -66,16 +70,18 @@ type OptionChain struct {
 	c *Client
 }
 
-// GetInstruments returns a list of option-typed instruments given a list of
+// GetInstrument returns a list of option-typed instruments given a list of
 // expiration dates for a given trade type.
-func (o *OptionChain) GetInstruments(tradeType string, dates ...string) ([]*OptionInstrument, error) {
+func (o *OptionChain) GetInstrument(tradeType string, date Date) ([]*OptionInstrument, error) {
 	u := fmt.Sprintf(
-		"%sinstruments/?chain_id=%s&expiration_dates=%s&state=active&tradability=tradable&type=%s",
+		"%sinstruments/?chain_id=%s&expiration_date=%s&state=active&tradability=tradable&type=%s",
 		EPOptions,
 		o.ID,
-		strings.Join(dates, ","),
+		date.String(),
 		tradeType,
 	)
+
+	fmt.Printf("u = %+v\n", u)
 
 	var out struct{ Results []*OptionInstrument }
 	err := o.c.GetAndDecode(u, &out)
@@ -120,6 +126,8 @@ type OptionInstrument struct {
 	c *Client
 }
 
+// MarketData is the current pricing data and greeks for a given option at a
+// given time.
 type MarketData struct {
 	AdjustedMarkPrice   float64 `json:"adjusted_mark_price,string"`
 	AskPrice            float64 `json:"ask_price,string"`
