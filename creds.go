@@ -72,7 +72,7 @@ func (c *CredsCacher) Token() (*oauth2.Token, error) {
 		return nil, err
 	}
 
-	f, err := os.OpenFile(c.Path, os.O_CREATE|os.O_RDWR, 0640)
+	f, err := os.OpenFile(c.Path, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0640)
 	if err != nil {
 		return nil, err
 	}
