@@ -1,7 +1,9 @@
 package robinhood
 
 import (
+	"context"
 	"fmt"
+	"io"
 	"net/url"
 	"strings"
 	"time"
@@ -12,6 +14,16 @@ const dateFormat = "2006-01-02"
 // Date is a specific json time format for dates only
 type Date struct {
 	time.Time
+}
+
+// NewDate returns a new Date in the local time zone
+func NewDate(y, m, d int) Date {
+	return Date{time.Date(y, time.Month(m), d, 0, 0, 0, 0, time.Local)}
+}
+
+// NewZonedDate returns a date with a zone.
+func NewZonedDate(y, m, d int, z *time.Location) Date {
+	return Date{time.Date(y, time.Month(m), d, 0, 0, 0, 0, z)}
 }
 
 func (d Date) String() string {
@@ -68,25 +80,59 @@ type OptionChain struct {
 	c *Client
 }
 
+type Pager struct {
+	Next, Previous string
+}
+
+func (p Pager) HasMore() bool {
+	return p.Next != ""
+}
+
+func (p *Pager) GetNext(c *Client, out interface{}) error {
+	if p.Next == "" {
+		return io.EOF
+	}
+
+	return c.GetAndDecode(p.Next, out)
+}
+
 // GetInstrument returns a list of option-typed instruments given a list of
 // expiration dates for a given trade type.
-func (o *OptionChain) GetInstrument(tradeType string, date Date) ([]*OptionInstrument, error) {
+func (o *OptionChain) GetInstrument(ctx context.Context, tradeType string, date Date) ([]*OptionInstrument, error) {
 	u := fmt.Sprintf(
 		"%sinstruments/?chain_id=%s&expiration_date=%s&state=active&tradability=tradable&type=%s",
-		EPOptions,
-		o.ID,
-		date.String(),
+		EPOptions, o.ID,
+		date,
 		tradeType,
 	)
 
-	fmt.Printf("u = %+v\n", u)
+	rs := []*OptionInstrument{}
 
-	var out struct{ Results []*OptionInstrument }
+	var out struct {
+		Results []*OptionInstrument
+		Pager
+	}
 	err := o.c.GetAndDecode(u, &out)
 	if err != nil {
 		return nil, err
 	}
-	return out.Results, nil
+
+	rs = append(rs, out.Results...)
+
+	for out.HasMore() {
+		err := out.GetNext(o.c, &out)
+		if err != nil {
+			return rs, err
+		}
+		rs = append(rs, out.Results...)
+
+		select {
+		case <-ctx.Done():
+			return rs, nil
+		default:
+		}
+	}
+	return rs, nil
 }
 
 // MinTicks probably is important.
@@ -109,7 +155,7 @@ type OptionInstrument struct {
 	ChainID        string   `json:"chain_id"`
 	ChainSymbol    string   `json:"chain_symbol"`
 	CreatedAt      string   `json:"created_at"`
-	ExpirationDate string   `json:"expiration_date"`
+	ExpirationDate Date     `json:"expiration_date"`
 	ID             string   `json:"id"`
 	IssueDate      string   `json:"issue_date"`
 	MinTicks       MinTicks `json:"min_ticks"`
@@ -153,11 +199,22 @@ type MarketData struct {
 	Volume              int     `json:"volume"`
 }
 
-// MarketData returns market data for all the listed Option instruments
-func (c *Client) MarketData(os ...*OptionInstrument) ([]MarketData, error) {
-	is := make([]string, len(os))
+// OIsForDate filters OptionInstruments for expiration date.
+func OIsForDate(os []*OptionInstrument, d Date) []*OptionInstrument {
+	out := make([]*OptionInstrument, 0, len(os)/6)
+	for i := range os {
+		if os[i].ExpirationDate.Time.Equal(d.Time) {
+			out = append(out, os[i])
+		}
+	}
+	return out
+}
 
-	for i, o := range os {
+// MarketData returns market data for all the listed Option instruments
+func (c *Client) MarketData(opts ...*OptionInstrument) ([]*MarketData, error) {
+	is := make([]string, len(opts))
+
+	for i, o := range opts {
 		is[i] = o.URL
 	}
 
@@ -166,15 +223,40 @@ func (c *Client) MarketData(os ...*OptionInstrument) ([]MarketData, error) {
 		return nil, shameWrap(err, "couldn't parse URL const EPOptionQuote")
 	}
 
-	q := u.Query()
-	q.Add("instruments", strings.Join(is, ","))
-	u.RawQuery = q.Encode()
-
-	var r struct{ Results []MarketData }
-	err = c.GetAndDecode(u.String(), &r)
-	if err != nil {
-		return nil, err
+	num := 30
+	n := len(is) / num
+	if len(is)%num != 0 {
+		n++
 	}
 
-	return r.Results, nil
+	errCt := 0
+	rs := []*MarketData{}
+
+	for i := 0; i < n; i++ {
+		end := (i + 1) * num
+		if end > len(is)-1 {
+			end = len(is) - 1
+		}
+
+		q := url.Values{"instruments": []string{strings.Join(is[i*num:end], ",")}}
+
+		u.RawQuery = q.Encode()
+
+		var r struct{ Results []*MarketData }
+		err = c.GetAndDecode(u.String(), &r)
+		if err != nil {
+			errCt++
+			continue
+		}
+		for _, res := range r.Results {
+			if res != nil {
+				rs = append(rs, res)
+			}
+		}
+	}
+	if len(rs) == 0 && errCt == n {
+		return nil, fmt.Errorf("no marketdata was found for given OptionInstruments, all calls errored")
+	}
+
+	return rs, nil
 }

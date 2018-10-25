@@ -1,10 +1,13 @@
 package robinhood
 
 import (
+	"context"
+	"fmt"
 	"os"
 	"testing"
 	"time"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -26,9 +29,17 @@ func TestMarketData(t *testing.T) {
 	ch, err := c.GetOptionChains(i)
 	asrt.NoError(err)
 
-	insts, err := ch[0].GetInstrument("put", Date{time.Date(2019, 01, 01, 0, 0, 0, 0, time.Local)})
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	insts, err := ch[0].GetInstrument(ctx, "call", NewDate(2018, 10, 26))
 	asrt.NoError(err)
 
-	_, err = c.MarketData(insts[:10]...)
+	fmt.Printf("len(insts) = %+v\n", len(insts))
+
+	is, err := c.MarketData(insts...)
 	asrt.NoError(err)
+
+	spew.Dump(is)
+	fmt.Printf("len(is) = %+v\n", len(is))
 }
