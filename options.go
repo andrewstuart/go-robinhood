@@ -5,8 +5,6 @@ import (
 	"net/url"
 	"strings"
 	"time"
-
-	"github.com/davecgh/go-spew/spew"
 )
 
 const dateFormat = "2006-01-02"
@@ -173,7 +171,6 @@ func (c *Client) MarketData(os ...*OptionInstrument) ([]MarketData, error) {
 	u.RawQuery = q.Encode()
 
 	var r struct{ Results []MarketData }
-	spew.Dump(u.String())
 	err = c.GetAndDecode(u.String(), &r)
 	if err != nil {
 		return nil, err

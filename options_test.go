@@ -29,6 +29,6 @@ func TestMarketData(t *testing.T) {
 	insts, err := ch[0].GetInstrument("put", Date{time.Date(2019, 01, 01, 0, 0, 0, 0, time.Local)})
 	asrt.NoError(err)
 
-	_, _err = c.MarketData(insts[:10]...)
+	_, err = c.MarketData(insts[:10]...)
 	asrt.NoError(err)
 }
