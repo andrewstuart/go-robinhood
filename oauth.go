@@ -17,8 +17,11 @@ const DefaultClientID = "c82SH0WZOsabOXGP2sxqcj34FxkvfnWRZBKlBjFS"
 
 // OAuth implements oauth2 using the robinhood implementation
 type OAuth struct {
-	Endpoint, ClientID, Username, Password string
+	Endpoint, ClientID, Username, Password, MFA string
 }
+
+// ErrMFARequired indicates the MFA was required but not provided.
+var ErrMFARequired = fmt.Errorf("Two Factor Auth code required and not supplied")
 
 // Token implements TokenSource
 func (p *OAuth) Token() (*oauth2.Token, error) {
@@ -44,6 +47,10 @@ func (p *OAuth) Token() (*oauth2.Token, error) {
 		"username": []string{p.Username},
 		"password": []string{p.Password},
 	}
+	if p.MFA != "" {
+		v.Add("mfa_code", p.MFA)
+	}
+
 	req, err := http.NewRequest(
 		"POST",
 		u.String(),
@@ -63,11 +70,18 @@ func (p *OAuth) Token() (*oauth2.Token, error) {
 
 	var o struct {
 		oauth2.Token
-		ExpiresIn int `json:"expires_in"`
+		ExpiresIn   int    `json:"expires_in"`
+		MFARequired bool   `json:"mfa_required"`
+		MFAType     string `json:"mfa_type"`
 	}
+
 	err = json.NewDecoder(res.Body).Decode(&o)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not decode token")
+	}
+
+	if o.MFARequired {
+		return nil, ErrMFARequired
 	}
 
 	o.Token.Expiry = time.Now().Add(time.Duration(o.ExpiresIn) * time.Second)

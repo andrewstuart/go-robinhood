@@ -44,12 +44,12 @@ func Dial(s oauth2.TokenSource) (*Client, error) {
 		Client: oauth2.NewClient(context.Background(), s),
 	}
 
-	a, _ := c.GetAccounts()
+	a, err := c.GetAccounts()
 	if len(a) > 0 {
 		c.Account = &a[0]
 	}
 
-	return c, nil
+	return c, err
 }
 
 // GetAndDecode retrieves from the endpoint and unmarshals resulting json into
