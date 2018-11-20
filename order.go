@@ -21,7 +21,7 @@ func (o OrderSide) MarshalJSON() ([]byte, error) {
 //go:generate stringer -type OrderSide
 // Buy/Sell
 const (
-	Sell OrderSide = iota
+	Sell OrderSide = iota + 1
 	Buy
 )
 
