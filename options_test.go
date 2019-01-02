@@ -32,7 +32,7 @@ func TestMarketData(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	insts, err := ch[0].GetInstrument(ctx, "call", NewDate(2018, 10, 26))
+	insts, err := ch[0].GetInstrument(ctx, "call", NewDate(2019, 2, 1))
 	asrt.NoError(err)
 
 	fmt.Printf("len(insts) = %+v\n", len(insts))

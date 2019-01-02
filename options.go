@@ -97,11 +97,15 @@ func (p *Pager) GetNext(c *Client, out interface{}) error {
 }
 
 // GetInstrument returns a list of option-typed instruments given a list of
-// expiration dates for a given trade type.
+// expiration dates for a given trade type. The request will continue until the
+// provided context is cancelled. This is done to mimic the way the web UI
+// fetches many, many options instruments repeatedly, since I haven't yet
+// figured out how/when they decide to stop.
 func (o *OptionChain) GetInstrument(ctx context.Context, tradeType string, date Date) ([]*OptionInstrument, error) {
 	u := fmt.Sprintf(
-		"%sinstruments/?chain_id=%s&expiration_date=%s&state=active&tradability=tradable&type=%s",
-		EPOptions, o.ID,
+		"%sinstruments/?chain_id=%s&expiration_dates=%s&state=active&tradability=tradable&type=%s",
+		EPOptions,
+		o.ID,
 		date,
 		tradeType,
 	)
@@ -223,7 +227,9 @@ func (c *Client) MarketData(opts ...*OptionInstrument) ([]*MarketData, error) {
 		return nil, shameWrap(err, "couldn't parse URL const EPOptionQuote")
 	}
 
+	// Number of instruments to request at once
 	num := 30
+	// Number of requests this will require to be made
 	n := len(is) / num
 	if len(is)%num != 0 {
 		n++
@@ -233,9 +239,9 @@ func (c *Client) MarketData(opts ...*OptionInstrument) ([]*MarketData, error) {
 	rs := []*MarketData{}
 
 	for i := 0; i < n; i++ {
-		end := (i + 1) * num
-		if end > len(is)-1 {
-			end = len(is) - 1
+		end := (i+1)*num + 1
+		if end > len(is) {
+			end = len(is)
 		}
 
 		q := url.Values{"instruments": []string{strings.Join(is[i*num:end], ",")}}
