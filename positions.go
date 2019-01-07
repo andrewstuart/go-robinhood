@@ -18,3 +18,10 @@ func (c Client) GetPositions(a Account) ([]Position, error) {
 	err := c.GetAndDecode(a.Positions, &r)
 	return r.Results, err
 }
+
+// GetCurrentPositions returns all positions with a non-zero quantity.
+func (c Client) GetCurrentPositions(a Account) ([]Position, error) {
+	var r struct{ Results []Position }
+	err := c.GetAndDecode(a.Positions+"?nonzero=true", &r)
+	return r.Results, err
+}
