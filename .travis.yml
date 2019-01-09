@@ -1,9 +1,6 @@
 language: go
 go_import_path: astuart.co/go-robinhood
 
-script:
-  - go get && go build ./...
-
 matrix:
   allow_failures:
     - go: tip
