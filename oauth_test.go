@@ -8,6 +8,10 @@ import (
 )
 
 func TestOauthPassword(t *testing.T) {
+	if os.Getenv("ROBINHOOD_USERNAME") == "" {
+		t.Skip("No username set")
+		return
+	}
 	asrt := assert.New(t)
 
 	o := &CredsCacher{

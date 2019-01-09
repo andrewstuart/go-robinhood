@@ -12,6 +12,10 @@ import (
 )
 
 func TestMarketData(t *testing.T) {
+	if os.Getenv("ROBINHOOD_USERNAME") == "" {
+		t.Skip("No username set")
+		return
+	}
 	asrt := assert.New(t)
 	o := &OAuth{
 		Username: os.Getenv("ROBINHOOD_USERNAME"),

@@ -1,5 +1,7 @@
 package robinhood
 
+import "net/url"
+
 type Position struct {
 	Meta
 	Account                 string  `json:"account"`
@@ -14,7 +16,34 @@ type Position struct {
 
 // GetPositions returns all the positions associated with an account.
 func (c Client) GetPositions(a Account) ([]Position, error) {
+	return c.GetPositionsParams(a, PositionParams{})
+}
+
+// PositionParams encapsulates parameters known to the RobinHood positions API
+// endpoint.
+type PositionParams struct {
+	NonZero bool
+}
+
+// Encode returns the query string associated with the requested parameters
+func (p PositionParams) encode() string {
+	v := url.Values{}
+	if p.NonZero {
+		v.Set("nonzero", "true")
+	}
+	return v.Encode()
+}
+
+// GetPositionsParams returns all the positions associated with a count, but
+// passes the encoded PositionsParams object along to the RobinHood API as part
+// of the query string.
+func (c Client) GetPositionsParams(a Account, p PositionParams) ([]Position, error) {
+	u, err := url.Parse(a.Positions)
+	if err != nil {
+		return nil, err
+	}
+	u.RawQuery = p.encode()
+
 	var r struct{ Results []Position }
-	err := c.GetAndDecode(a.Positions, &r)
-	return r.Results, err
+	return r.Results, c.GetAndDecode(u.String(), &r)
 }
