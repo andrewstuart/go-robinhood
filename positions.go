@@ -38,7 +38,13 @@ func (p PositionParams) Encode() string {
 // passes the encoded PositionsParams object along to the RobinHood API as part
 // of the query string.
 func (c Client) GetPositionsParams(a Account, p PositionParams) ([]Position, error) {
+	u, err := url.Parse(a.Positions)
+	if err != nil {
+		return nil, err
+	}
+	u.RawQuery = p.Encode()
+
 	var r struct{ Results []Position }
-	err := c.GetAndDecode(a.Positions+p.Encode(), &r)
+	err := c.GetAndDecode(u.String(), &r)
 	return r.Results, err
 }
