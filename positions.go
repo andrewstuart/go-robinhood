@@ -26,7 +26,7 @@ type PositionParams struct {
 }
 
 // Encode returns the query string associated with the requested parameters
-func (p PositionParams) Encode() string {
+func (p PositionParams) encode() string {
 	v := url.Values{}
 	if p.NonZero {
 		v.Set("nonzero", "true")
@@ -42,9 +42,8 @@ func (c Client) GetPositionsParams(a Account, p PositionParams) ([]Position, err
 	if err != nil {
 		return nil, err
 	}
-	u.RawQuery = p.Encode()
+	u.RawQuery = p.encode()
 
 	var r struct{ Results []Position }
-	err := c.GetAndDecode(u.String(), &r)
-	return r.Results, err
+	return r.Results, c.GetAndDecode(u.String(), &r)
 }
