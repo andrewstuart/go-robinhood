@@ -36,7 +36,7 @@ func (i Instrument) OrderSymbol() string {
 }
 
 // GetInstrument returns an Instrument given a URL
-func (c Client) GetInstrument(instURL string) (*Instrument, error) {
+func (c *Client) GetInstrument(instURL string) (*Instrument, error) {
 	var i Instrument
 	err := c.GetAndDecode(instURL, &i)
 	if err != nil {
@@ -46,7 +46,7 @@ func (c Client) GetInstrument(instURL string) (*Instrument, error) {
 }
 
 // GetInstrumentForSymbol returns an Instrument given a ticker symbol
-func (c Client) GetInstrumentForSymbol(sym string) (*Instrument, error) {
+func (c *Client) GetInstrumentForSymbol(sym string) (*Instrument, error) {
 	var i struct {
 		Results []Instrument
 	}

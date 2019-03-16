@@ -15,7 +15,7 @@ type Position struct {
 }
 
 // GetPositions returns all the positions associated with an account.
-func (c Client) GetPositions(a Account) ([]Position, error) {
+func (c *Client) GetPositions(a Account) ([]Position, error) {
 	return c.GetPositionsParams(a, PositionParams{})
 }
 
@@ -37,7 +37,7 @@ func (p PositionParams) encode() string {
 // GetPositionsParams returns all the positions associated with a count, but
 // passes the encoded PositionsParams object along to the RobinHood API as part
 // of the query string.
-func (c Client) GetPositionsParams(a Account, p PositionParams) ([]Position, error) {
+func (c *Client) GetPositionsParams(a Account, p PositionParams) ([]Position, error) {
 	u, err := url.Parse(a.Positions)
 	if err != nil {
 		return nil, err
