@@ -4,9 +4,9 @@ package robinhood
 
 import "strconv"
 
-const _TimeInForce_name = "GTCGFDIOCOPG"
+const _TimeInForce_name = "GTCGFDIOCOPGFOK"
 
-var _TimeInForce_index = [...]uint8{0, 3, 6, 9, 12}
+var _TimeInForce_index = [...]uint8{0, 3, 6, 9, 12, 15}
 
 func (i TimeInForce) String() string {
 	if i < 0 || i >= TimeInForce(len(_TimeInForce_index)-1) {
