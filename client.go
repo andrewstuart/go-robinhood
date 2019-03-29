@@ -54,7 +54,7 @@ func Dial(s oauth2.TokenSource) (*Client, error) {
 
 // GetAndDecode retrieves from the endpoint and unmarshals resulting json into
 // the provided destination interface, which must be a pointer.
-func (c Client) GetAndDecode(url string, dest interface{}) error {
+func (c *Client) GetAndDecode(url string, dest interface{}) error {
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return err
@@ -76,7 +76,7 @@ func (e ErrorMap) Error() string {
 
 // DoAndDecode provides useful abstractions around common errors and decoding
 // issues.
-func (c Client) DoAndDecode(req *http.Request, dest interface{}) error {
+func (c *Client) DoAndDecode(req *http.Request, dest interface{}) error {
 	res, err := c.Do(req)
 	if err != nil {
 		return err
