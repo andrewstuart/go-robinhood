@@ -7,6 +7,8 @@ import (
 	"net/url"
 	"strings"
 	"time"
+
+	"github.com/hashicorp/go-multierror"
 )
 
 const dateFormat = "2006-01-02"
@@ -236,7 +238,6 @@ func (c *Client) MarketData(opts ...*OptionInstrument) ([]*MarketData, error) {
 	}
 
 	rs := []*MarketData{}
-	var errs []string
 
 	for i := 0; i < n; i++ {
 		end := (i+1)*num + 1
@@ -249,8 +250,8 @@ func (c *Client) MarketData(opts ...*OptionInstrument) ([]*MarketData, error) {
 		u.RawQuery = q.Encode()
 
 		var r struct{ Results []*MarketData }
-		if err := c.GetAndDecode(u.String(), &r); err != nil {
-			errs = append(errs, err.Error())
+		if e := c.GetAndDecode(u.String(), &r); err != nil {
+			err = multierror.Append(err, e)
 			continue
 		}
 		for _, res := range r.Results {
@@ -259,9 +260,6 @@ func (c *Client) MarketData(opts ...*OptionInstrument) ([]*MarketData, error) {
 			}
 		}
 	}
-	if len(rs) == 0 && len(errs) == n {
-		return nil, fmt.Errorf("no marketdata was found for given OptionInstruments, all calls errored: (%s)", strings.Join(errs, "; "))
-	}
 
-	return rs, nil
+	return rs, err
 }
