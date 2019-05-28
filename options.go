@@ -235,8 +235,8 @@ func (c *Client) MarketData(opts ...*OptionInstrument) ([]*MarketData, error) {
 		n++
 	}
 
-	errCt := 0
 	rs := []*MarketData{}
+	var errs []string
 
 	for i := 0; i < n; i++ {
 		end := (i+1)*num + 1
@@ -249,9 +249,8 @@ func (c *Client) MarketData(opts ...*OptionInstrument) ([]*MarketData, error) {
 		u.RawQuery = q.Encode()
 
 		var r struct{ Results []*MarketData }
-		err = c.GetAndDecode(u.String(), &r)
-		if err != nil {
-			errCt++
+		if err := c.GetAndDecode(u.String(), &r); err != nil {
+			errs = append(errs, err.Error())
 			continue
 		}
 		for _, res := range r.Results {
@@ -260,8 +259,8 @@ func (c *Client) MarketData(opts ...*OptionInstrument) ([]*MarketData, error) {
 			}
 		}
 	}
-	if len(rs) == 0 && errCt == n {
-		return nil, fmt.Errorf("no marketdata was found for given OptionInstruments, all calls errored")
+	if len(rs) == 0 && len(errs) == n {
+		return nil, fmt.Errorf("no marketdata was found for given OptionInstruments, all calls errored: (%s)", strings.Join(errs, "; "))
 	}
 
 	return rs, nil
