@@ -15,25 +15,31 @@ import (
 
 // Endpoints for the Robinhood API
 const (
-	EPBase         = "https://api.robinhood.com/"
-	EPLogin        = EPBase + "oauth2/token/"
-	EPAccounts     = EPBase + "accounts/"
-	EPQuotes       = EPBase + "quotes/"
-	EPPortfolios   = EPBase + "portfolios/"
-	EPWatchlists   = EPBase + "watchlists/"
-	EPInstruments  = EPBase + "instruments/"
-	EPFundamentals = EPBase + "fundamentals/"
-	EPOrders       = EPBase + "orders/"
-	EPOptions      = EPBase + "options/"
-	EPMarket       = EPBase + "marketdata/"
-	EPOptionQuote  = EPMarket + "options/"
+	EPBase                = "https://api.robinhood.com/"
+	EPCryptoBase          = "https://nummus.robinhood.com/"
+	EPCryptoOrders        = EPCryptoBase + "orders/"
+	EPCryptoAccount       = EPCryptoBase + "accounts/"
+	EPCryptoCurrencyPairs = EPCryptoBase + "currency_pairs/"
+	EPCryptoHoldings      = EPCryptoBase + "holdings/"
+	EPLogin               = EPBase + "oauth2/token/"
+	EPAccounts            = EPBase + "accounts/"
+	EPQuotes              = EPBase + "quotes/"
+	EPPortfolios          = EPBase + "portfolios/"
+	EPWatchlists          = EPBase + "watchlists/"
+	EPInstruments         = EPBase + "instruments/"
+	EPFundamentals        = EPBase + "fundamentals/"
+	EPOrders              = EPBase + "orders/"
+	EPOptions             = EPBase + "options/"
+	EPMarket              = EPBase + "marketdata/"
+	EPOptionQuote         = EPMarket + "options/"
 )
 
 // A Client is a helpful abstraction around some common metadata required for
 // API operations.
 type Client struct {
-	Token   string
-	Account *Account
+	Token         string
+	Account       *Account
+	CryptoAccount *CryptoAccount
 	*http.Client
 }
 
@@ -56,6 +62,7 @@ func Dial(s oauth2.TokenSource) (*Client, error) {
 // the provided destination interface, which must be a pointer.
 func (c *Client) GetAndDecode(url string, dest interface{}) error {
 	req, err := http.NewRequest("GET", url, nil)
+	req.Header.Set("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36")
 	if err != nil {
 		return err
 	}

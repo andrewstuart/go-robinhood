@@ -65,3 +65,21 @@ func (c *Client) GetAccounts() ([]Account, error) {
 	}
 	return r.Results, err
 }
+
+// CryptoAccount holds the basic account details relevant to robinhood API
+type CryptoAccount struct {
+	ID     string `json:"id"`
+	Status string `json:"status"`
+	UserID string `json:"user_id"`
+}
+
+// GetCryptoAccounts will return associated cryto account
+func (c *Client) GetCryptoAccounts() ([]CryptoAccount, error) {
+	var r struct{ Results []CryptoAccount }
+	err := c.GetAndDecode(EPCryptoAccount, &r)
+	if err != nil {
+		return nil, err
+	}
+
+	return r.Results, err
+}
