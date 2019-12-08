@@ -21,6 +21,7 @@ const (
 	EPCryptoAccount       = EPCryptoBase + "accounts/"
 	EPCryptoCurrencyPairs = EPCryptoBase + "currency_pairs/"
 	EPCryptoHoldings      = EPCryptoBase + "holdings/"
+	EPCryptoPortfolio     = EPCryptoBase + "portfolios/"
 	EPLogin               = EPBase + "oauth2/token/"
 	EPAccounts            = EPBase + "accounts/"
 	EPQuotes              = EPBase + "quotes/"
@@ -62,7 +63,7 @@ func Dial(s oauth2.TokenSource) (*Client, error) {
 // the provided destination interface, which must be a pointer.
 func (c *Client) GetAndDecode(url string, dest interface{}) error {
 	req, err := http.NewRequest("GET", url, nil)
-	req.Header.Set("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36")
+	req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36")
 	if err != nil {
 		return err
 	}
