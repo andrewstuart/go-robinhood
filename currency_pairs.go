@@ -1,7 +1,13 @@
 package robinhood
 
-// CryptoCurrencyPairs represent all availabe crypto currencies and whether they are tradeable or not
-type CryptoCurrencyPairs struct {
+import (
+	"errors"
+
+	"fmt"
+)
+
+// CryptoCurrencyPair represent all availabe crypto currencies and whether they are tradeable or not
+type CryptoCurrencyPair struct {
 	CyrptoAssetCurrency    AssetCurrency `json:"asset_currency"`
 	ID                     string        `json:"id"`
 	MaxOrderSize           float64       `json:"max_order_size,string"`
@@ -32,8 +38,25 @@ type AssetCurrency struct {
 }
 
 // GetCryptoCurrencyPairs will give which crypto currencies are tradeable and corresponding ids
-func (c *Client) GetCryptoCurrencyPairs() ([]CryptoCurrencyPairs, error) {
-	var r struct{ Results []CryptoCurrencyPairs }
+func (c *Client) GetCryptoCurrencyPairs() ([]CryptoCurrencyPair, error) {
+	var r struct{ Results []CryptoCurrencyPair }
 	err := c.GetAndDecode(EPCryptoCurrencyPairs, &r)
 	return r.Results, err
+}
+
+// GetCryptoInstrument will take standard crypto symbol and return usable information
+// to place the order
+func (c *Client) GetCryptoInstrument(symbol string) (*CryptoCurrencyPair, error) {
+	allPairs, err := c.GetCryptoCurrencyPairs()
+	if err != nil {
+		return nil, fmt.Errorf("call failed with error: %v", err.Error())
+	}
+
+	for _, pair := range allPairs {
+		if pair.CyrptoAssetCurrency.Code == symbol {
+			return &pair, nil
+		}
+	}
+
+	return nil, errors.New("could not find given symbol")
 }
