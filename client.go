@@ -56,6 +56,11 @@ func Dial(s oauth2.TokenSource) (*Client, error) {
 		c.Account = &a[0]
 	}
 
+	ca, err := c.GetCryptoAccounts()
+	if len(ca) > 0 {
+		c.CryptoAccount = &ca[0]
+	}
+
 	return c, err
 }
 
