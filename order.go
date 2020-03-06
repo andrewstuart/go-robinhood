@@ -68,11 +68,6 @@ type apiOrder struct {
 	OverrideDtbpChecks     bool `json:"override_dtbp_checks,omitempty"`
 }
 
-// type Orderable interface {
-// 	OrderURL() string
-// 	OrderSymbol() string
-// }
-
 // Order places an order for a given instrument
 func (c *Client) Order(i *Instrument, o OrderOpts) (*OrderOutput, error) {
 	a := apiOrder{

@@ -15,25 +15,32 @@ import (
 
 // Endpoints for the Robinhood API
 const (
-	EPBase         = "https://api.robinhood.com/"
-	EPLogin        = EPBase + "oauth2/token/"
-	EPAccounts     = EPBase + "accounts/"
-	EPQuotes       = EPBase + "quotes/"
-	EPPortfolios   = EPBase + "portfolios/"
-	EPWatchlists   = EPBase + "watchlists/"
-	EPInstruments  = EPBase + "instruments/"
-	EPFundamentals = EPBase + "fundamentals/"
-	EPOrders       = EPBase + "orders/"
-	EPOptions      = EPBase + "options/"
-	EPMarket       = EPBase + "marketdata/"
-	EPOptionQuote  = EPMarket + "options/"
+	EPBase                = "https://api.robinhood.com/"
+	EPCryptoBase          = "https://nummus.robinhood.com/"
+	EPCryptoOrders        = EPCryptoBase + "orders/"
+	EPCryptoAccount       = EPCryptoBase + "accounts/"
+	EPCryptoCurrencyPairs = EPCryptoBase + "currency_pairs/"
+	EPCryptoHoldings      = EPCryptoBase + "holdings/"
+	EPCryptoPortfolio     = EPCryptoBase + "portfolios/"
+	EPLogin               = EPBase + "oauth2/token/"
+	EPAccounts            = EPBase + "accounts/"
+	EPQuotes              = EPBase + "quotes/"
+	EPPortfolios          = EPBase + "portfolios/"
+	EPWatchlists          = EPBase + "watchlists/"
+	EPInstruments         = EPBase + "instruments/"
+	EPFundamentals        = EPBase + "fundamentals/"
+	EPOrders              = EPBase + "orders/"
+	EPOptions             = EPBase + "options/"
+	EPMarket              = EPBase + "marketdata/"
+	EPOptionQuote         = EPMarket + "options/"
 )
 
 // A Client is a helpful abstraction around some common metadata required for
 // API operations.
 type Client struct {
-	Token   string
-	Account *Account
+	Token         string
+	Account       *Account
+	CryptoAccount *CryptoAccount
 	*http.Client
 }
 
@@ -47,6 +54,11 @@ func Dial(s oauth2.TokenSource) (*Client, error) {
 	a, err := c.GetAccounts()
 	if len(a) > 0 {
 		c.Account = &a[0]
+	}
+
+	ca, err := c.GetCryptoAccounts()
+	if len(ca) > 0 {
+		c.CryptoAccount = &ca[0]
 	}
 
 	return c, err

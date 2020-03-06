@@ -1,5 +1,6 @@
 package robinhood
 
+// Portfolio holds all information regarding the portfolio
 type Portfolio struct {
 	Account                                string  `json:"account"`
 	AdjustedEquityPreviousClose            float64 `json:"adjusted_equity_previous_close,string"`
@@ -21,10 +22,28 @@ type Portfolio struct {
 	WithdrawableAmount                     float64 `json:"withdrawable_amount,string"`
 }
 
+// CryptoPortfolio returns all the portfolio associated with a client's account
+type CryptoPortfolio struct {
+	AccountID                string  `json:"account_id"`
+	Equity                   float64 `json:"equity,string"`
+	ExtendedHoursEquity      float64 `json:"extended_hours_equity,string"`
+	ExtendedHoursMarketValue float64 `json:"extended_hours_market_value,string"`
+	ID                       string  `json:"id"`
+	MarketValue              float64 `json:"market_value,string"`
+}
+
 // GetPortfolios returns all the portfolios associated with a client's
 // credentials and accounts
 func (c *Client) GetPortfolios() ([]Portfolio, error) {
 	var p struct{ Results []Portfolio }
 	err := c.GetAndDecode(EPPortfolios, &p)
 	return p.Results, err
+}
+
+// GetCryptoPortfolios returns crypto portfolio info
+func (c *Client) GetCryptoPortfolios() (CryptoPortfolio, error) {
+	var p CryptoPortfolio
+	var portfolioURL = EPCryptoPortfolio + c.CryptoAccount.ID
+	err := c.GetAndDecode(portfolioURL, &p)
+	return p, err
 }
