@@ -14,9 +14,12 @@ type Position struct {
 	SharesHeldForSells      float64 `json:"shares_held_for_sells,string"`
 }
 
-// GetPositions returns all the positions associated with an account.
-func (c *Client) GetPositions(a Account) ([]Position, error) {
-	return c.GetPositionsParams(a, PositionParams{})
+// GetPositions returns all the positionss associated with a client's
+// credentials and accounts
+func (c *Client) GetPositions() ([]Position, error) {
+	var p struct{ Results []Position }
+	err := c.GetAndDecode(EPPositions, &p)
+	return p.Results, err
 }
 
 // PositionParams encapsulates parameters known to the RobinHood positions API
