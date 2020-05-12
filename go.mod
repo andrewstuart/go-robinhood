@@ -1,4 +1,4 @@
-module astuart.co/go-robinhood
+module github.com/coolboy/go-robinhood
 
 require (
 	github.com/davecgh/go-spew v1.1.1
