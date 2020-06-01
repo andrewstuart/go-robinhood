@@ -34,5 +34,10 @@ func (q Quote) Price() float64 {
 	if IsRegularTradingTime() {
 		return q.LastTradePrice
 	}
-	return q.LastExtendedHoursTradePrice
+
+	if q.LastExtendedHoursTradePrice != 0 {
+		return q.LastExtendedHoursTradePrice
+	} else {
+		return q.AdjustedPreviousClose
+	}
 }
