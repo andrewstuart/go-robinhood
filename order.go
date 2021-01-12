@@ -176,3 +176,32 @@ func (c *Client) RecentOrders() ([]OrderOutput, error) {
 
 	return o.Results, nil
 }
+
+// AllOrders returns all orders made by this client.
+func (c *Client) AllOrders() ([]OrderOutput, error) {
+	var o struct {
+		Results []OrderOutput
+	}
+	
+	url := EPOrders
+	for {
+		var tmp struct {
+			Results []OrderOutput
+			Next string
+		}
+		err := c.GetAndDecode(url, &tmp)
+
+		if err != nil {
+			return nil, err
+		}
+
+		url = tmp.Next
+		o.Results = append(o.Results, tmp.Results...)
+
+		if url == "" {
+			break
+		}
+	}
+	
+	return o.Results, nil
+}
