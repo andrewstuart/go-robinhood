@@ -2,6 +2,7 @@ package robinhood
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -68,8 +69,10 @@ type apiOrder struct {
 	OverrideDtbpChecks     bool `json:"override_dtbp_checks,omitempty"`
 }
 
-// Order places an order for a given instrument
-func (c *Client) Order(i *Instrument, o OrderOpts) (*OrderOutput, error) {
+// Order places an order for a given instrument. Cancellation of the given
+// context cancels only the _http request_ and not any orders that may have
+// been created regardless of the cancellation.
+func (c *Client) Order(ctx context.Context, i *Instrument, o OrderOpts) (*OrderOutput, error) {
 	a := apiOrder{
 		Account:       c.Account.URL,
 		Instrument:    i.URL,
@@ -96,10 +99,10 @@ func (c *Client) Order(i *Instrument, o OrderOpts) (*OrderOutput, error) {
 	post, err := http.NewRequest("POST", EPOrders, bytes.NewReader(bs))
 	post.Header.Add("Content-Type", "application/json")
 
-	var out OrderOutput
-	err = c.DoAndDecode(post, &out)
+	out := OrderOutput{}
+	err = c.DoAndDecode(ctx, post, &out)
 	if err != nil {
-		return nil, err
+		return &out, err
 	}
 
 	out.client = c
@@ -137,19 +140,19 @@ type OrderOutput struct {
 }
 
 // Update returns any errors and updates the item with any recent changes.
-func (o *OrderOutput) Update() error {
-	return o.client.GetAndDecode(o.URL, o)
+func (o *OrderOutput) Update(ctx context.Context) error {
+	return o.client.GetAndDecode(ctx, o.URL, o)
 }
 
 // Cancel attempts to cancel an odrer
-func (o OrderOutput) Cancel() error {
+func (o OrderOutput) Cancel(ctx context.Context) error {
 	post, err := http.NewRequest("POST", o.CancelURL, nil)
 	if err != nil {
 		return err
 	}
 
 	var o2 OrderOutput
-	err = o.client.DoAndDecode(post, &o2)
+	err = o.client.DoAndDecode(ctx, post, &o2)
 	if err != nil {
 		return errors.Wrap(err, "could not decode response")
 	}
@@ -161,13 +164,13 @@ func (o OrderOutput) Cancel() error {
 }
 
 // RecentOrders returns any recent orders made by this client.
-func (c *Client) RecentOrders() ([]OrderOutput, error) {
+func (c *Client) RecentOrders(ctx context.Context) ([]OrderOutput, error) {
 	var o struct {
 		Results []OrderOutput
 	}
-	err := c.GetAndDecode(EPOrders, &o)
+	err := c.GetAndDecode(ctx, EPOrders, &o)
 	if err != nil {
-		return nil, err
+		return o.Results, err
 	}
 
 	for i := range o.Results {
@@ -178,21 +181,27 @@ func (c *Client) RecentOrders() ([]OrderOutput, error) {
 }
 
 // AllOrders returns all orders made by this client.
-func (c *Client) AllOrders() ([]OrderOutput, error) {
+func (c *Client) AllOrders(ctx context.Context) ([]OrderOutput, error) {
 	var o struct {
 		Results []OrderOutput
 	}
 
 	url := EPOrders
 	for {
+		select {
+		case <-ctx.Done():
+			return o.Results, ctx.Err()
+		default:
+		}
+
 		var tmp struct {
 			Results []OrderOutput
 			Next    string
 		}
-		err := c.GetAndDecode(url, &tmp)
+		err := c.GetAndDecode(ctx, url, &tmp)
 
 		if err != nil {
-			return nil, err
+			return o.Results, err
 		}
 
 		url = tmp.Next

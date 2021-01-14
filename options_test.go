@@ -22,15 +22,15 @@ func TestMarketData(t *testing.T) {
 		Password: os.Getenv("ROBINHOOD_PASSWORD"),
 	}
 
-	c, err := Dial(&CredsCacher{Creds: o})
+	c, err := Dial(context.Background(), &CredsCacher{Creds: o})
 
 	asrt.NoError(err)
 	asrt.NotNil(c)
 
-	i, err := c.GetInstrumentForSymbol("SPY")
+	i, err := c.GetInstrumentForSymbol(context.Background(), "SPY")
 	asrt.NoError(err)
 
-	ch, err := c.GetOptionChains(i)
+	ch, err := c.GetOptionChains(context.Background(), i)
 	asrt.NoError(err)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -41,7 +41,7 @@ func TestMarketData(t *testing.T) {
 
 	fmt.Printf("len(insts) = %+v\n", len(insts))
 
-	is, err := c.MarketData(insts...)
+	is, err := c.MarketData(context.Background(), insts...)
 	asrt.NoError(err)
 
 	spew.Dump(is)

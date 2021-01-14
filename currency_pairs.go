@@ -1,6 +1,7 @@
 package robinhood
 
 import (
+	"context"
 	"errors"
 
 	"fmt"
@@ -38,16 +39,16 @@ type AssetCurrency struct {
 }
 
 // GetCryptoCurrencyPairs will give which crypto currencies are tradeable and corresponding ids
-func (c *Client) GetCryptoCurrencyPairs() ([]CryptoCurrencyPair, error) {
+func (c *Client) GetCryptoCurrencyPairs(ctx context.Context) ([]CryptoCurrencyPair, error) {
 	var r struct{ Results []CryptoCurrencyPair }
-	err := c.GetAndDecode(EPCryptoCurrencyPairs, &r)
+	err := c.GetAndDecode(ctx, EPCryptoCurrencyPairs, &r)
 	return r.Results, err
 }
 
 // GetCryptoInstrument will take standard crypto symbol and return usable information
 // to place the order
-func (c *Client) GetCryptoInstrument(symbol string) (*CryptoCurrencyPair, error) {
-	allPairs, err := c.GetCryptoCurrencyPairs()
+func (c *Client) GetCryptoInstrument(ctx context.Context, symbol string) (*CryptoCurrencyPair, error) {
+	allPairs, err := c.GetCryptoCurrencyPairs(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("call failed with error: %v", err.Error())
 	}

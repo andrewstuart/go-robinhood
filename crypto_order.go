@@ -2,6 +2,7 @@ package robinhood
 
 import (
 	"bytes"
+	"context"
 	"math"
 
 	"github.com/google/uuid"
@@ -61,7 +62,7 @@ type CryptoOrderOpts struct {
 }
 
 // CryptoOrder will actually place the order
-func (c *Client) CryptoOrder(cryptoPair CryptoCurrencyPair, o CryptoOrderOpts) (*CryptoOrderOutput, error) {
+func (c *Client) CryptoOrder(ctx context.Context, cryptoPair CryptoCurrencyPair, o CryptoOrderOpts) (*CryptoOrderOutput, error) {
 	var quantity = math.Round(o.AmountInDollars / o.Price)
 	a := CryptoOrder{
 		AccountID:      c.CryptoAccount.ID,
@@ -84,7 +85,7 @@ func (c *Client) CryptoOrder(cryptoPair CryptoCurrencyPair, o CryptoOrderOpts) (
 	post.Header.Add("Content-Type", "application/json")
 
 	var out CryptoOrderOutput
-	err = c.DoAndDecode(post, &out)
+	err = c.DoAndDecode(ctx, post, &out)
 
 	if err != nil {
 		return nil, err
@@ -95,14 +96,14 @@ func (c *Client) CryptoOrder(cryptoPair CryptoCurrencyPair, o CryptoOrderOpts) (
 }
 
 // Cancel will cancel the order
-func (o CryptoOrderOutput) Cancel() error {
+func (o CryptoOrderOutput) Cancel(ctx context.Context) error {
 	post, err := http.NewRequest("POST", o.CancelURL, nil)
 	if err != nil {
 		return err
 	}
 
 	var output CryptoOrderOutput
-	err = o.client.DoAndDecode(post, &output)
+	err = o.client.DoAndDecode(ctx, post, &output)
 
 	if err != nil {
 		return errors.Wrap(err, "could not decode response")

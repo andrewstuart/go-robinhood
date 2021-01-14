@@ -1,6 +1,9 @@
 package robinhood
 
-import "fmt"
+import (
+	"context"
+	"fmt"
+)
 
 // Instrument is a type to represent the "instrument" API type in the
 // unofficial robinhood API.
@@ -42,9 +45,9 @@ func (i Instrument) OrderSymbol() string {
 }
 
 // GetInstrument returns an Instrument given a URL
-func (c *Client) GetInstrument(instURL string) (*Instrument, error) {
+func (c *Client) GetInstrument(ctx context.Context, instURL string) (*Instrument, error) {
 	var i Instrument
-	err := c.GetAndDecode(instURL, &i)
+	err := c.GetAndDecode(ctx, instURL, &i)
 	if err != nil {
 		return nil, err
 	}
@@ -52,11 +55,11 @@ func (c *Client) GetInstrument(instURL string) (*Instrument, error) {
 }
 
 // GetInstrumentForSymbol returns an Instrument given a ticker symbol
-func (c *Client) GetInstrumentForSymbol(sym string) (*Instrument, error) {
+func (c *Client) GetInstrumentForSymbol(ctx context.Context, sym string) (*Instrument, error) {
 	var i struct {
 		Results []Instrument
 	}
-	err := c.GetAndDecode(EPInstruments+"?symbol="+sym, &i)
+	err := c.GetAndDecode(ctx, EPInstruments+"?symbol="+sym, &i)
 	if err != nil {
 		return nil, err
 	}

@@ -1,5 +1,7 @@
 package robinhood
 
+import "context"
+
 // Account holds the basic account details relevant to the RobinHood API
 type Account struct {
 	Meta
@@ -57,9 +59,9 @@ type MarginBalances struct {
 }
 
 // GetAccounts returns all the accounts associated with a login/client.
-func (c *Client) GetAccounts() ([]Account, error) {
+func (c *Client) GetAccounts(ctx context.Context) ([]Account, error) {
 	var r struct{ Results []Account }
-	err := c.GetAndDecode(EPAccounts, &r)
+	err := c.GetAndDecode(ctx, EPAccounts, &r)
 	if err != nil {
 		return nil, err
 	}
@@ -74,9 +76,9 @@ type CryptoAccount struct {
 }
 
 // GetCryptoAccounts will return associated cryto account
-func (c *Client) GetCryptoAccounts() ([]CryptoAccount, error) {
+func (c *Client) GetCryptoAccounts(ctx context.Context) ([]CryptoAccount, error) {
 	var r struct{ Results []CryptoAccount }
-	err := c.GetAndDecode(EPCryptoAccount, &r)
+	err := c.GetAndDecode(ctx, EPCryptoAccount, &r)
 	if err != nil {
 		return nil, err
 	}

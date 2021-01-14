@@ -1,6 +1,9 @@
 package robinhood
 
-import "net/url"
+import (
+	"context"
+	"net/url"
+)
 
 type Position struct {
 	Meta
@@ -46,13 +49,13 @@ type LegPosition struct {
 type Unknown interface{}
 
 // GetPositions returns all the positions associated with an account.
-func (c *Client) GetOptionPositions() ([]OptionPostion, error) {
-	return c.GetOptionPositionsParams(PositionParams{NonZero: true})
+func (c *Client) GetOptionPositions(ctx context.Context) ([]OptionPostion, error) {
+	return c.GetOptionPositionsParams(ctx, PositionParams{NonZero: true})
 }
 
 // GetPositions returns all the positions associated with an account.
-func (c *Client) GetPositions() ([]Position, error) {
-	return c.GetPositionsParams(PositionParams{NonZero: true})
+func (c *Client) GetPositions(ctx context.Context) ([]Position, error) {
+	return c.GetPositionsParams(ctx, PositionParams{NonZero: true})
 }
 
 // PositionParams encapsulates parameters known to the RobinHood positions API
@@ -73,7 +76,7 @@ func (p PositionParams) encode() string {
 // GetPositionsParams returns all the positions associated with a count, but
 // passes the encoded PositionsParams object along to the RobinHood API as part
 // of the query string.
-func (c *Client) GetPositionsParams(p PositionParams) ([]Position, error) {
+func (c *Client) GetPositionsParams(ctx context.Context, p PositionParams) ([]Position, error) {
 	u, err := url.Parse(EPPositions)
 	if err != nil {
 		return nil, err
@@ -81,13 +84,13 @@ func (c *Client) GetPositionsParams(p PositionParams) ([]Position, error) {
 	u.RawQuery = p.encode()
 
 	var r struct{ Results []Position }
-	return r.Results, c.GetAndDecode(u.String(), &r)
+	return r.Results, c.GetAndDecode(ctx, u.String(), &r)
 }
 
 // GetPositionsParams returns all the positions associated with a count, but
 // passes the encoded PositionsParams object along to the RobinHood API as part
 // of the query string.
-func (c *Client) GetOptionPositionsParams(p PositionParams) ([]OptionPostion, error) {
+func (c *Client) GetOptionPositionsParams(ctx context.Context, p PositionParams) ([]OptionPostion, error) {
 	u, err := url.Parse(EPOptions + "aggregate_positions/")
 	if err != nil {
 		return nil, err
@@ -95,5 +98,5 @@ func (c *Client) GetOptionPositionsParams(p PositionParams) ([]OptionPostion, er
 	u.RawQuery = p.encode()
 
 	var r struct{ Results []OptionPostion }
-	return r.Results, c.GetAndDecode(u.String(), &r)
+	return r.Results, c.GetAndDecode(ctx, u.String(), &r)
 }

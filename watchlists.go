@@ -1,7 +1,9 @@
 package robinhood
 
 import (
-	"sync"
+	"context"
+
+	"golang.org/x/sync/errgroup"
 )
 
 // A Watchlist is a list of stock Instruments that an investor is tracking in
@@ -15,9 +17,9 @@ type Watchlist struct {
 }
 
 // GetWatchlists retrieves the watchlists for a given set of credentials/accounts.
-func (c *Client) GetWatchlists() ([]Watchlist, error) {
+func (c *Client) GetWatchlists(ctx context.Context) ([]Watchlist, error) {
 	var r struct{ Results []Watchlist }
-	err := c.GetAndDecode(EPWatchlists, &r)
+	err := c.GetAndDecode(ctx, EPWatchlists, &r)
 	if err != nil {
 		return nil, err
 	}
@@ -30,44 +32,39 @@ func (c *Client) GetWatchlists() ([]Watchlist, error) {
 }
 
 // GetInstruments returns the list of Instruments associated with a Watchlist.
-func (w *Watchlist) GetInstruments() ([]Instrument, error) {
+func (w *Watchlist) GetInstruments(ctx context.Context) ([]Instrument, error) {
 	var r struct {
 		Results []struct {
 			Instrument, URL string
 		}
 	}
 
-	err := w.Client.GetAndDecode(w.URL, &r)
+	err := w.Client.GetAndDecode(ctx, w.URL, &r)
 	if err != nil {
 		return nil, err
 	}
 
 	insts := make([]*Instrument, len(r.Results))
-	wg := &sync.WaitGroup{}
-	wg.Add(len(r.Results))
+	eg, ctx := errgroup.WithContext(ctx)
 
 	for i := range r.Results {
-		go func(i int) {
-			defer wg.Done()
-
-			inst, err := w.Client.GetInstrument(r.Results[i].Instrument)
-			if err != nil {
-				return
-			}
-
+		// shadow for safe closure access
+		i := i
+		eg.Go(func() error {
+			inst, err := w.Client.GetInstrument(ctx, r.Results[i].Instrument)
 			insts[i] = inst
-		}(i)
+			return err
+		})
 	}
 
-	wg.Wait()
+	err = eg.Wait()
 
 	// Filter slice for empties (if error)
-	retInsts := []Instrument{}
+	retInsts := make([]Instrument, 0, len(r.Results))
 	for _, inst := range insts {
 		if inst != nil {
 			retInsts = append(retInsts, *inst)
 		}
 	}
-
 	return retInsts, err
 }

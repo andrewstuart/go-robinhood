@@ -48,7 +48,7 @@ func (d *Date) UnmarshalJSON(bs []byte) error {
 }
 
 // GetOptionChains returns options for the given instruments
-func (c *Client) GetOptionChains(is ...*Instrument) ([]*OptionChain, error) {
+func (c *Client) GetOptionChains(ctx context.Context, is ...*Instrument) ([]*OptionChain, error) {
 	s := []string{}
 	for _, inst := range is {
 		s = append(s, inst.ID)
@@ -56,7 +56,7 @@ func (c *Client) GetOptionChains(is ...*Instrument) ([]*OptionChain, error) {
 
 	var res struct{ Results []*OptionChain }
 
-	err := c.GetAndDecode(EPOptions+"chains/?equity_instrument_ids="+strings.Join(s, ","), &res)
+	err := c.GetAndDecode(ctx, EPOptions+"chains/?equity_instrument_ids="+strings.Join(s, ","), &res)
 	if err != nil {
 		return nil, err
 	}
@@ -90,12 +90,12 @@ func (p Pager) HasMore() bool {
 	return p.Next != ""
 }
 
-func (p *Pager) GetNext(c *Client, out interface{}) error {
+func (p *Pager) GetNext(ctx context.Context, c *Client, out interface{}) error {
 	if p.Next == "" {
 		return io.EOF
 	}
 
-	return c.GetAndDecode(p.Next, out)
+	return c.GetAndDecode(ctx, p.Next, out)
 }
 
 // GetInstrument returns a list of option-typed instruments given a list of
@@ -112,13 +112,12 @@ func (o *OptionChain) GetInstrument(ctx context.Context, tradeType string, date 
 		tradeType,
 	)
 
-	rs := []*OptionInstrument{}
-
+	var rs []*OptionInstrument
 	var out struct {
 		Results []*OptionInstrument
 		Pager
 	}
-	err := o.c.GetAndDecode(u, &out)
+	err := o.c.GetAndDecode(ctx, u, &out)
 	if err != nil {
 		return nil, err
 	}
@@ -126,17 +125,17 @@ func (o *OptionChain) GetInstrument(ctx context.Context, tradeType string, date 
 	rs = append(rs, out.Results...)
 
 	for out.HasMore() {
-		err := out.GetNext(o.c, &out)
+		select {
+		case <-ctx.Done():
+			return rs, ctx.Err()
+		default:
+		}
+
+		err := out.GetNext(ctx, o.c, &out)
 		if err != nil {
 			return rs, err
 		}
 		rs = append(rs, out.Results...)
-
-		select {
-		case <-ctx.Done():
-			return rs, nil
-		default:
-		}
 	}
 	return rs, nil
 }
@@ -217,7 +216,7 @@ func OIsForDate(os []*OptionInstrument, d Date) []*OptionInstrument {
 }
 
 // MarketData returns market data for all the listed Option instruments
-func (c *Client) MarketData(opts ...*OptionInstrument) ([]*MarketData, error) {
+func (c *Client) MarketData(ctx context.Context, opts ...*OptionInstrument) ([]*MarketData, error) {
 	is := make([]string, len(opts))
 
 	for i, o := range opts {
@@ -250,7 +249,7 @@ func (c *Client) MarketData(opts ...*OptionInstrument) ([]*MarketData, error) {
 		u.RawQuery = q.Encode()
 
 		var r struct{ Results []*MarketData }
-		if e := c.GetAndDecode(u.String(), &r); err != nil {
+		if e := c.GetAndDecode(ctx, u.String(), &r); err != nil {
 			err = multierror.Append(err, e)
 			continue
 		}

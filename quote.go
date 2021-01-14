@@ -1,6 +1,7 @@
 package robinhood
 
 import (
+	"context"
 	"strings"
 )
 
@@ -22,10 +23,10 @@ type Quote struct {
 }
 
 // GetQuote returns all the latest stock quotes for the list of stocks provided
-func (c *Client) GetQuote(stocks ...string) ([]Quote, error) {
+func (c *Client) GetQuote(ctx context.Context, stocks ...string) ([]Quote, error) {
 	url := EPQuotes + "?symbols=" + strings.Join(stocks, ",")
 	var r struct{ Results []Quote }
-	err := c.GetAndDecode(url, &r)
+	err := c.GetAndDecode(ctx, url, &r)
 	return r.Results, err
 }
 

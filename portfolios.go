@@ -1,5 +1,7 @@
 package robinhood
 
+import "context"
+
 // Portfolio holds all information regarding the portfolio
 type Portfolio struct {
 	Account                                string  `json:"account"`
@@ -34,16 +36,16 @@ type CryptoPortfolio struct {
 
 // GetPortfolios returns all the portfolios associated with a client's
 // credentials and accounts
-func (c *Client) GetPortfolios() ([]Portfolio, error) {
+func (c *Client) GetPortfolios(ctx context.Context) ([]Portfolio, error) {
 	var p struct{ Results []Portfolio }
-	err := c.GetAndDecode(EPPortfolios, &p)
+	err := c.GetAndDecode(ctx, EPPortfolios, &p)
 	return p.Results, err
 }
 
 // GetCryptoPortfolios returns crypto portfolio info
-func (c *Client) GetCryptoPortfolios() (CryptoPortfolio, error) {
+func (c *Client) GetCryptoPortfolios(ctx context.Context) (CryptoPortfolio, error) {
 	var p CryptoPortfolio
 	var portfolioURL = EPCryptoPortfolio + c.CryptoAccount.ID
-	err := c.GetAndDecode(portfolioURL, &p)
+	err := c.GetAndDecode(ctx, portfolioURL, &p)
 	return p, err
 }

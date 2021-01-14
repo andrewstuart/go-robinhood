@@ -2,6 +2,7 @@ package robinhood
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"net/http"
 
@@ -42,8 +43,10 @@ type Leg struct {
 	Side           OrderSide `json:"side"`
 }
 
-// OrderOptions places a new order for options
-func (c *Client) OrderOptions(q *OptionInstrument, o OptionsOrderOpts) (json.RawMessage, error) {
+// OrderOptions places a new order for options. Cancellation of the
+// context.Context will cancel the _http request_, never the order itself if it
+// has already been created.
+func (c *Client) OrderOptions(ctx context.Context, q *OptionInstrument, o OptionsOrderOpts) (json.RawMessage, error) {
 	b := optionInput{
 		Account:     c.Account.URL,
 		Direction:   o.Direction,
@@ -77,7 +80,7 @@ func (c *Client) OrderOptions(q *OptionInstrument, o OptionsOrderOpts) (json.Raw
 	req.Header.Set("Content-Type", "application/json")
 
 	var out json.RawMessage
-	err = c.DoAndDecode(req, &out)
+	err = c.DoAndDecode(ctx, req, &out)
 	if err != nil {
 		return nil, err
 	}
@@ -85,9 +88,9 @@ func (c *Client) OrderOptions(q *OptionInstrument, o OptionsOrderOpts) (json.Raw
 }
 
 // GetOptionsOrders returns all outstanding options orders
-func (c *Client) GetOptionsOrders() (json.RawMessage, error) {
+func (c *Client) GetOptionsOrders(ctx context.Context) (json.RawMessage, error) {
 	var o json.RawMessage
-	err := c.GetAndDecode(EPOptions+"orders/", &o)
+	err := c.GetAndDecode(ctx, EPOptions+"orders/", &o)
 	if err != nil {
 		return nil, err
 	}
