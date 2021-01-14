@@ -14,9 +14,45 @@ type Position struct {
 	SharesHeldForSells      float64 `json:"shares_held_for_sells,string"`
 }
 
+type OptionPostion struct {
+	Chain                    string        `json:"chain"`
+	AverageOpenPrice         string        `json:"average_open_price"`
+	Symbol                   string        `json:"symbol"`
+	Quantity                 string        `json:"quantity"`
+	Direction                string        `json:"direction"`
+	IntradayDirection        string        `json:"intraday_direction"`
+	TradeValueMultiplier     string        `json:"trade_value_multiplier"`
+	Account                  string        `json:"account"`
+	Strategy                 string        `json:"strategy"`
+	Legs                     []LegPosition `json:"legs"`
+	IntradayQuantity         string        `json:"intraday_quantity"`
+	UpdatedAt                string        `json:"updated_at"`
+	Id                       string        `json:"id"`
+	IntradayAverageOpenPrice string        `json:"intraday_average_open_price"`
+	CreatedAt                string        `json:"created_at"`
+}
+
+type LegPosition struct {
+	Id             string `json:"id"`
+	Position       string `json:"position"`
+	PositionType   string `json:"position_type"`
+	Option         string `json:"option"`
+	RatioQuantity  string `json:"ratio_quantity"`
+	ExpirationDate string `json:"expiration_date"`
+	StrikePrice    string `json:"strike_price"`
+	OptionType     string `json:"option_type"`
+}
+
+type Unknown interface{}
+
 // GetPositions returns all the positions associated with an account.
-func (c *Client) GetPositions(a Account) ([]Position, error) {
-	return c.GetPositionsParams(a, PositionParams{})
+func (c *Client) GetOptionPositions() ([]OptionPostion, error) {
+	return c.GetOptionPositionsParams(PositionParams{NonZero: true})
+}
+
+// GetPositions returns all the positions associated with an account.
+func (c *Client) GetPositions() ([]Position, error) {
+	return c.GetPositionsParams(PositionParams{NonZero: true})
 }
 
 // PositionParams encapsulates parameters known to the RobinHood positions API
@@ -37,13 +73,27 @@ func (p PositionParams) encode() string {
 // GetPositionsParams returns all the positions associated with a count, but
 // passes the encoded PositionsParams object along to the RobinHood API as part
 // of the query string.
-func (c *Client) GetPositionsParams(a Account, p PositionParams) ([]Position, error) {
-	u, err := url.Parse(a.Positions)
+func (c *Client) GetPositionsParams(p PositionParams) ([]Position, error) {
+	u, err := url.Parse(EPPositions)
 	if err != nil {
 		return nil, err
 	}
 	u.RawQuery = p.encode()
 
 	var r struct{ Results []Position }
+	return r.Results, c.GetAndDecode(u.String(), &r)
+}
+
+// GetPositionsParams returns all the positions associated with a count, but
+// passes the encoded PositionsParams object along to the RobinHood API as part
+// of the query string.
+func (c *Client) GetOptionPositionsParams(p PositionParams) ([]OptionPostion, error) {
+	u, err := url.Parse(EPOptions + "aggregate_positions/")
+	if err != nil {
+		return nil, err
+	}
+	u.RawQuery = p.encode()
+
+	var r struct{ Results []OptionPostion }
 	return r.Results, c.GetAndDecode(u.String(), &r)
 }

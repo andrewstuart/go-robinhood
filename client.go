@@ -26,6 +26,7 @@ const (
 	EPAccounts            = EPBase + "accounts/"
 	EPQuotes              = EPBase + "quotes/"
 	EPPortfolios          = EPBase + "portfolios/"
+	EPPositions           = EPBase + "positions/"
 	EPWatchlists          = EPBase + "watchlists/"
 	EPInstruments         = EPBase + "instruments/"
 	EPFundamentals        = EPBase + "fundamentals/"
