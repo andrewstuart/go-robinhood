@@ -25,11 +25,6 @@ var ErrMFARequired = fmt.Errorf("Two Factor Auth code required and not supplied"
 
 // Token implements TokenSource
 func (p *OAuth) Token() (*oauth2.Token, error) {
-	ep := p.Endpoint
-	if ep == "" {
-		ep = EPLogin
-	}
-
 	cliID := p.ClientID
 	if cliID == "" {
 		cliID = DefaultClientID

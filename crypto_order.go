@@ -3,6 +3,7 @@ package robinhood
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"math"
 
 	"github.com/google/uuid"
@@ -82,20 +83,19 @@ func (c *Client) CryptoOrder(ctx context.Context, cryptoPair CryptoCurrencyPair,
 	}
 
 	post, err := http.NewRequest("POST", EPCryptoOrders, bytes.NewReader(payload))
+	if err != nil {
+		return nil, fmt.Errorf("could not create Crypto http.Request: %w", err)
+	}
+
 	post.Header.Add("Content-Type", "application/json")
 
 	var out CryptoOrderOutput
 	err = c.DoAndDecode(ctx, post, &out)
-
-	if err != nil {
-		return nil, err
-	}
-
 	out.client = c
-	return &out, nil
+	return &out, err
 }
 
-// Cancel will cancel the order
+// Cancel will cancel the order.
 func (o CryptoOrderOutput) Cancel(ctx context.Context) error {
 	post, err := http.NewRequest("POST", o.CancelURL, nil)
 	if err != nil {

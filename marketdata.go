@@ -25,9 +25,9 @@ type PriceBookData struct {
 }
 
 // Pricebook get the current snapshot of the pricebook data
-func (c *Client) Pricebook(ctx context.Context, instrument_id string) (*PriceBookData, error) {
+func (c *Client) Pricebook(ctx context.Context, instrumentID string) (*PriceBookData, error) {
 	var out PriceBookData
-	err := c.GetAndDecode(ctx, fmt.Sprintf("%spricebook/snapshots/%s/", EPMarket, instrument_id), &out)
+	err := c.GetAndDecode(ctx, fmt.Sprintf("%spricebook/snapshots/%s/", EPMarket, instrumentID), &out)
 	if err != nil {
 		return nil, err
 	}

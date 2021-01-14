@@ -96,7 +96,7 @@ func (c *Client) DoAndDecode(ctx context.Context, req *http.Request, dest interf
 	}
 	defer res.Body.Close()
 
-	if res.StatusCode/100 != 2 {
+	if res.StatusCode >= 400 {
 		b := &bytes.Buffer{}
 		var e ErrorMap
 		err = json.NewDecoder(io.TeeReader(res.Body, b)).Decode(&e)

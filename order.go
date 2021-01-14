@@ -97,6 +97,10 @@ func (c *Client) Order(ctx context.Context, i *Instrument, o OrderOpts) (*OrderO
 	}
 
 	post, err := http.NewRequest("POST", EPOrders, bytes.NewReader(bs))
+	if err != nil {
+		return nil, fmt.Errorf("error creating POST http.Request: %w", err)
+	}
+
 	post.Header.Add("Content-Type", "application/json")
 
 	out := OrderOutput{}

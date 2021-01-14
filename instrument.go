@@ -32,8 +32,6 @@ type Instrument struct {
 	TradableChainID       string      `json:"tradable_chain_id"`
 	Type                  string      `json:"type"`
 	URL                   string      `json:"url"`
-
-	c Client
 }
 
 func (i Instrument) OrderURL() string {
