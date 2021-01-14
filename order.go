@@ -182,12 +182,12 @@ func (c *Client) AllOrders() ([]OrderOutput, error) {
 	var o struct {
 		Results []OrderOutput
 	}
-	
+
 	url := EPOrders
 	for {
 		var tmp struct {
 			Results []OrderOutput
-			Next string
+			Next    string
 		}
 		err := c.GetAndDecode(url, &tmp)
 
@@ -202,6 +202,6 @@ func (c *Client) AllOrders() ([]OrderOutput, error) {
 			break
 		}
 	}
-	
+
 	return o.Results, nil
 }
