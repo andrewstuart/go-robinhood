@@ -1,4 +1,4 @@
-[![GoDoc](https://godoc.org/astuart.co/go-robinhood?status.svg)](https://godoc.org/astuart.co/go-robinhood)
+o![GoDoc](https://pkg.go.dev/badge/astuart.co/go-robinhood/v2.svg)](https://godoc.org/astuart.co/go-robinhood/v2)
 
 # Robinhood the rich and feeding the poor, now automated
 
@@ -17,11 +17,11 @@ cli, err := robinhood.Dial(&robinhood.OAuth{
   Password: "mypasswordissecure",
 })
 
-//err
+// err
 
 i, err := cli.GetInstrumentForSymbol("SPY")
 
-//err
+// err
 
 o, err := cli.Order(i, robinhood.OrderOpts{
   Price: 100.0,
@@ -29,15 +29,15 @@ o, err := cli.Order(i, robinhood.OrderOpts{
   Quantity: 1,
 })
 
-//err
+// err
 
 time.Sleep(5*time.Second) //Let me think about it some more...
 
-//Ah crap, I need to buy groceries.
+// Ah crap, I need to buy groceries.
 
 err := o.Cancel()
 
 if err != nil {
-  //Oh well
+  // Oh well
 }
 ```
