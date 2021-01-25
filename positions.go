@@ -46,6 +46,18 @@ type LegPosition struct {
 	OptionType     string `json:"option_type"`
 }
 
+type CryptoPosition struct {
+	Meta
+	Id             			string  `json:"id"`
+	AccountId               string  `json:"account_id"`
+	Quantity                float64 `json:"quantity"`
+	QuantityAvailable       float64 `json:"quantity_avalaible"`
+	Currency                string  `json:"currency"`
+	CostBasis               float64 `json:"cost_basis"`
+	QuantityHeldForBuy      float64 `json:"quantity_held_for_buy"`
+	QuantityHeldForSell     float64 `json:"quantity_held_for_sell"`
+}
+
 type Unknown interface{}
 
 // GetPositions returns all the positions associated with an account.
@@ -73,7 +85,7 @@ func (p PositionParams) encode() string {
 	return v.Encode()
 }
 
-// GetPositionsParams returns all the positions associated with a count, but
+// GetPositionsParams returns all the positions associated with an account, but
 // passes the encoded PositionsParams object along to the RobinHood API as part
 // of the query string.
 func (c *Client) GetPositionsParams(ctx context.Context, p PositionParams) ([]Position, error) {
@@ -87,7 +99,7 @@ func (c *Client) GetPositionsParams(ctx context.Context, p PositionParams) ([]Po
 	return r.Results, c.GetAndDecode(ctx, u.String(), &r)
 }
 
-// GetPositionsParams returns all the positions associated with a count, but
+// GetPositionsParams returns all the option positions associated with an account, but
 // passes the encoded PositionsParams object along to the RobinHood API as part
 // of the query string.
 func (c *Client) GetOptionPositionsParams(ctx context.Context, p PositionParams) ([]OptionPostion, error) {
@@ -99,4 +111,23 @@ func (c *Client) GetOptionPositionsParams(ctx context.Context, p PositionParams)
 
 	var r struct{ Results []OptionPostion }
 	return r.Results, c.GetAndDecode(ctx, u.String(), &r)
+}
+
+// GetCryptoPositionsParams returns all the crypto positions associated with a count, but
+// passes the encoded PositionsParams object along to the RobinHood API as part
+// of the query string.
+func (c *Client) GetCryptoPositionsParams(ctx context.Context, p PositionParams) ([]CryptoPosition, error) {
+	u, err := url.Parse(EPCryptoHoldings)
+	if err != nil {
+		return nil, err
+	}
+	u.RawQuery = p.encode()
+
+	var r struct{ Results []CryptoPosition }
+	return r.Results, c.GetAndDecode(ctx, u.String(), &r)
+}
+
+
+func (c *Client) GetCryptoPositions(ctx context.Context) ([]CryptoPosition, error) {
+	return c.GetCryptoPositionsParams(ctx, PositionParams{NonZero: true})
 }
