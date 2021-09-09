@@ -30,13 +30,13 @@ type OptionPostion struct {
 	Legs                     []LegPosition `json:"legs"`
 	IntradayQuantity         string        `json:"intraday_quantity"`
 	UpdatedAt                string        `json:"updated_at"`
-	Id                       string        `json:"id"`
+	ID                       string        `json:"id"`
 	IntradayAverageOpenPrice string        `json:"intraday_average_open_price"`
 	CreatedAt                string        `json:"created_at"`
 }
 
 type LegPosition struct {
-	Id             string `json:"id"`
+	ID             string `json:"id"`
 	Position       string `json:"position"`
 	PositionType   string `json:"position_type"`
 	Option         string `json:"option"`
@@ -64,7 +64,7 @@ type PositionParams struct {
 	NonZero bool
 }
 
-// Encode returns the query string associated with the requested parameters
+// Encode returns the query string associated with the requested parameters.
 func (p PositionParams) encode() string {
 	v := url.Values{}
 	if p.NonZero {

@@ -1,6 +1,7 @@
 package robinhood
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -15,15 +16,15 @@ import (
 // DefaultClientID is used by the website.
 const DefaultClientID = "c82SH0WZOsabOXGP2sxqcj34FxkvfnWRZBKlBjFS"
 
-// OAuth implements oauth2 using the robinhood implementation
+// OAuth implements oauth2 using the robinhood implementation.
 type OAuth struct {
 	Endpoint, ClientID, Username, Password, MFA string
 }
 
 // ErrMFARequired indicates the MFA was required but not provided.
-var ErrMFARequired = fmt.Errorf("Two Factor Auth code required and not supplied")
+var ErrMFARequired = fmt.Errorf("two-factor auth code required and not supplied")
 
-// Token implements TokenSource
+// Token implements TokenSource.
 func (p *OAuth) Token() (*oauth2.Token, error) {
 	cliID := p.ClientID
 	if cliID == "" {
@@ -46,11 +47,7 @@ func (p *OAuth) Token() (*oauth2.Token, error) {
 		v.Add("mfa_code", p.MFA)
 	}
 
-	req, err := http.NewRequest(
-		"POST",
-		u.String(),
-		strings.NewReader(v.Encode()),
-	)
+	req, err := http.NewRequestWithContext(context.TODO(), "POST", u.String(), strings.NewReader(v.Encode()))
 	if err != nil {
 		return nil, errors.Wrap(err, "could not create request")
 	}

@@ -13,7 +13,7 @@ import (
 	"golang.org/x/oauth2"
 )
 
-// Endpoints for the Robinhood API
+// Endpoints for the Robinhood API.
 const (
 	EPBase                = "https://api.robinhood.com/"
 	EPCryptoBase          = "https://nummus.robinhood.com/"
@@ -53,6 +53,10 @@ func Dial(ctx context.Context, s oauth2.TokenSource) (*Client, error) {
 	}
 
 	a, err := c.GetAccounts(ctx)
+	if err != nil {
+		return c, err
+	}
+
 	if len(a) > 0 {
 		c.Account = &a[0]
 	}
@@ -68,7 +72,7 @@ func Dial(ctx context.Context, s oauth2.TokenSource) (*Client, error) {
 // GetAndDecode retrieves from the endpoint and unmarshals resulting json into
 // the provided destination interface, which must be a pointer.
 func (c *Client) GetAndDecode(ctx context.Context, url string, dest interface{}) error {
-	req, err := http.NewRequest("GET", url, nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 	if err != nil {
 		return err
 	}
@@ -76,7 +80,7 @@ func (c *Client) GetAndDecode(ctx context.Context, url string, dest interface{})
 	return c.DoAndDecode(ctx, req, dest)
 }
 
-// ErrorMap encapsulates the helpful error messages returned by the API server
+// ErrorMap encapsulates the helpful error messages returned by the API server.
 type ErrorMap map[string]interface{}
 
 func (e ErrorMap) Error() string {

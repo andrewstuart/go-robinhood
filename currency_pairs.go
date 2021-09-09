@@ -3,11 +3,9 @@ package robinhood
 import (
 	"context"
 	"errors"
-
 	"fmt"
 )
 
-// CryptoCurrencyPair represent all availabe crypto currencies and whether they are tradeable or not
 type CryptoCurrencyPair struct {
 	CyrptoAssetCurrency    AssetCurrency `json:"asset_currency"`
 	ID                     string        `json:"id"`
@@ -20,7 +18,7 @@ type CryptoCurrencyPair struct {
 	Tradability            string        `json:"tradability"`
 }
 
-// QuoteCurrency holds info about currency you can use to buy the cyrpto currency
+// QuoteCurrency holds info about currency you can use to buy the cyrpto currency.
 type QuoteCurrency struct {
 	Code      string  `json:"code"`
 	ID        string  `json:"id"`
@@ -29,7 +27,7 @@ type QuoteCurrency struct {
 	Type      string  `json:"type"`
 }
 
-// AssetCurrency has code and id of cryptocurrency
+// AssetCurrency has code and id of cryptocurrency.
 type AssetCurrency struct {
 	BrandColor string  `json:"brand_color"`
 	Code       string  `json:"code"`
@@ -38,7 +36,7 @@ type AssetCurrency struct {
 	Name       string  `json:"name"`
 }
 
-// GetCryptoCurrencyPairs will give which crypto currencies are tradeable and corresponding ids
+// GetCryptoCurrencyPairs will give which crypto currencies are tradeable and corresponding ids.
 func (c *Client) GetCryptoCurrencyPairs(ctx context.Context) ([]CryptoCurrencyPair, error) {
 	var r struct{ Results []CryptoCurrencyPair }
 	err := c.GetAndDecode(ctx, EPCryptoCurrencyPairs, &r)
@@ -46,11 +44,11 @@ func (c *Client) GetCryptoCurrencyPairs(ctx context.Context) ([]CryptoCurrencyPa
 }
 
 // GetCryptoInstrument will take standard crypto symbol and return usable information
-// to place the order
+// to place the order.
 func (c *Client) GetCryptoInstrument(ctx context.Context, symbol string) (*CryptoCurrencyPair, error) {
 	allPairs, err := c.GetCryptoCurrencyPairs(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("call failed with error: %v", err.Error())
+		return nil, fmt.Errorf("call failed with error: %w", err)
 	}
 
 	for _, pair := range allPairs {

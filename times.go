@@ -36,22 +36,16 @@ func nyMinute() int {
 	return MinuteOfDay(time.Now().In(nyLoc()))
 }
 
-// isWeekday returns whether or not the given time.Time is a weekday.
-func isWeekday(t time.Time) bool {
+// IsWeekday returns whether or not the given time.Time is a weekday.
+func IsWeekday(t time.Time) bool {
 	wd := t.Weekday()
 	return wd != time.Saturday && wd != time.Sunday
-}
-
-// IsWeekDay returns whether the given time is a regular
-// weekday
-func IsWeekDay(t time.Time) bool {
-	return isWeekday(time.Now())
 }
 
 // NextWeekday returns the next weekday.
 func NextWeekday() time.Time {
 	d := time.Now().AddDate(0, 0, 1)
-	for !isWeekday(d) {
+	for !IsWeekday(d) {
 		d = d.AddDate(0, 0, 1)
 	}
 	return d
@@ -98,30 +92,30 @@ func NextMarketOpen() time.Time {
 // NextMarketExtendedOpen returns the time of the next extended opening time,
 // when stock equity may begin to fluctuate again.
 func NextMarketExtendedOpen() time.Time {
-	return nextWeekdayHourMinuteNY(HrExtendedOpen, 00)
+	return nextWeekdayHourMinuteNY(HrExtendedOpen, 0o0)
 }
 
 // NextRobinhoodExtendedOpen returns the time of the next robinhood extended
 // opening time, when robinhood users can make trades.
 func NextRobinhoodExtendedOpen() time.Time {
-	return nextWeekdayHourMinuteNY(HrRHExtendedOpen, 00)
+	return nextWeekdayHourMinuteNY(HrRHExtendedOpen, 0o0)
 }
 
 // NextMarketClose returns the time of the next market close.
 func NextMarketClose() time.Time {
-	return nextWeekdayHourMinuteNY(HrClose, 00)
+	return nextWeekdayHourMinuteNY(HrClose, 0o0)
 }
 
 // NextRobinhoodExtendedClose returns the time of the next robinhood extended
 // closing time, when robinhood users must place their last extended-hours
 // trade.
 func NextRobinhoodExtendedClose() time.Time {
-	return nextWeekdayHourMinuteNY(HrRHExtendedClose, 00)
+	return nextWeekdayHourMinuteNY(HrRHExtendedClose, 0o0)
 }
 
 // NextMarketExtendedClose returns the time of the next extended market close,
 // when stock equity numbers will stop being updated until the next extended
 // open.
 func NextMarketExtendedClose() time.Time {
-	return nextWeekdayHourMinuteNY(HrRHExtendedClose, 00)
+	return nextWeekdayHourMinuteNY(HrRHExtendedClose, 0o0)
 }

@@ -3,18 +3,16 @@ package robinhood
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"math"
+	"net/http"
 
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
-
-	"encoding/json"
-
-	"net/http"
 )
 
-// CryptoOrder is the payload to create a crypto currency order
+// CryptoOrder is the payload to create a crypto currency order.
 type CryptoOrder struct {
 	AccountID      string  `json:"account_id,omitempty"`
 	CurrencyPairID string  `json:"currency_pair_id,omitempty"`
@@ -26,7 +24,7 @@ type CryptoOrder struct {
 	Type           string  `json:"type,omitempty"`
 }
 
-// CryptoOrderOutput holds the response from api
+// CryptoOrderOutput holds the response from api.
 type CryptoOrderOutput struct {
 	Meta
 	Account            string        `json:"account"`
@@ -50,7 +48,7 @@ type CryptoOrderOutput struct {
 	client *Client
 }
 
-// CryptoOrderOpts encapsulates differences between order types
+// CryptoOrderOpts encapsulates differences between order types.
 type CryptoOrderOpts struct {
 	Side            OrderSide
 	Type            OrderType
@@ -62,9 +60,9 @@ type CryptoOrderOpts struct {
 	Stop, Force     bool
 }
 
-// CryptoOrder will actually place the order
+// CryptoOrder will actually place the order.
 func (c *Client) CryptoOrder(ctx context.Context, cryptoPair CryptoCurrencyPair, o CryptoOrderOpts) (*CryptoOrderOutput, error) {
-	var quantity = math.Round(o.AmountInDollars / o.Price)
+	quantity := math.Round(o.AmountInDollars / o.Price)
 	a := CryptoOrder{
 		AccountID:      c.CryptoAccount.ID,
 		CurrencyPairID: cryptoPair.ID,
@@ -77,12 +75,11 @@ func (c *Client) CryptoOrder(ctx context.Context, cryptoPair CryptoCurrencyPair,
 	}
 
 	payload, err := json.Marshal(a)
-
 	if err != nil {
 		return nil, err
 	}
 
-	post, err := http.NewRequest("POST", EPCryptoOrders, bytes.NewReader(payload))
+	post, err := http.NewRequestWithContext(ctx, "POST", EPCryptoOrders, bytes.NewReader(payload))
 	if err != nil {
 		return nil, fmt.Errorf("could not create Crypto http.Request: %w", err)
 	}

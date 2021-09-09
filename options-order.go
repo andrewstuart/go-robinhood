@@ -9,7 +9,7 @@ import (
 	"github.com/google/uuid"
 )
 
-// OptionsOrderOpts encapsulates common Options order choices
+// OptionsOrderOpts encapsulates common Options order choices.
 type OptionsOrderOpts struct {
 	Quantity    float64
 	Price       float64
@@ -19,7 +19,7 @@ type OptionsOrderOpts struct {
 	Side        OrderSide
 }
 
-// optionInput is the input object to the RobinHood API
+// optionInput is the input object to the RobinHood API.
 type optionInput struct {
 	Account                string          `json:"account"`
 	Direction              OptionDirection `json:"direction"`
@@ -73,7 +73,7 @@ func (c *Client) OrderOptions(ctx context.Context, q *OptionInstrument, o Option
 		return nil, err
 	}
 
-	req, err := http.NewRequest("POST", EPOptions+"orders/", bytes.NewReader(bs))
+	req, err := http.NewRequestWithContext(ctx, "POST", EPOptions+"orders/", bytes.NewReader(bs))
 	if err != nil {
 		return nil, err
 	}
@@ -87,7 +87,7 @@ func (c *Client) OrderOptions(ctx context.Context, q *OptionInstrument, o Option
 	return out, nil
 }
 
-// GetOptionsOrders returns all outstanding options orders
+// GetOptionsOrders returns all outstanding options orders.
 func (c *Client) GetOptionsOrders(ctx context.Context) (json.RawMessage, error) {
 	var o json.RawMessage
 	err := c.GetAndDecode(ctx, EPOptions+"orders/", &o)
@@ -96,5 +96,4 @@ func (c *Client) GetOptionsOrders(ctx context.Context) (json.RawMessage, error) 
 	}
 
 	return o, nil
-
 }

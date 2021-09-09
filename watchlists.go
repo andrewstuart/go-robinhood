@@ -13,7 +13,7 @@ type Watchlist struct {
 	URL  string `json:"url"`
 	User string `json:"user"`
 
-	Client *Client `json:",ignore"`
+	Client *Client `json:"-"`
 }
 
 // GetWatchlists retrieves the watchlists for a given set of credentials/accounts.

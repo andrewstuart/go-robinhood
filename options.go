@@ -13,12 +13,12 @@ import (
 
 const dateFormat = "2006-01-02"
 
-// Date is a specific json time format for dates only
+// Date is a specific json time format for dates only.
 type Date struct {
 	time.Time
 }
 
-// NewDate returns a new Date in the local time zone
+// NewDate returns a new Date in the local time zone.
 func NewDate(y, m, d int) Date {
 	return Date{time.Date(y, time.Month(m), d, 0, 0, 0, 0, time.Local)}
 }
@@ -32,12 +32,12 @@ func (d Date) String() string {
 	return d.Format(dateFormat)
 }
 
-// MarshalJSON implements json.Marshaler
+// MarshalJSON implements json.Marshaler.
 func (d Date) MarshalJSON() ([]byte, error) {
 	return []byte("\"" + d.String() + "\""), nil
 }
 
-// UnmarshalJSON implements json.Unmarshaler
+// UnmarshalJSON implements json.Unmarshaler.
 func (d *Date) UnmarshalJSON(bs []byte) error {
 	t, err := time.Parse(dateFormat, strings.Trim(strings.TrimSpace(string(bs)), "\""))
 	if err != nil {
@@ -47,7 +47,7 @@ func (d *Date) UnmarshalJSON(bs []byte) error {
 	return nil
 }
 
-// GetOptionChains returns options for the given instruments
+// GetOptionChains returns options for the given instruments.
 func (c *Client) GetOptionChains(ctx context.Context, is ...*Instrument) ([]*OptionChain, error) {
 	s := []string{}
 	for _, inst := range is {
@@ -68,7 +68,7 @@ func (c *Client) GetOptionChains(ctx context.Context, is ...*Instrument) ([]*Opt
 	return res.Results, nil
 }
 
-// OptionChain represents the data the RobinHood API holds behind options chains
+// OptionChain represents the data the RobinHood API holds behind options chains.
 type OptionChain struct {
 	CanOpenPosition       bool                   `json:"can_open_position"`
 	CashComponent         interface{}            `json:"cash_component"`
@@ -148,14 +148,14 @@ type MinTicks struct {
 }
 
 // UnderlyingInstrument is the type that represents a link from an option back
-// to its standard financial instrument (stock)
+// to its standard financial instrument (stock).
 type UnderlyingInstrument struct {
 	ID         string `json:"id"`
 	Instrument string `json:"instrument"`
 	Quantity   int    `json:"quantity"`
 }
 
-// An OptionInstrument can have a quote
+// An OptionInstrument can have a quote.
 type OptionInstrument struct {
 	ChainID        string   `json:"chain_id"`
 	ChainSymbol    string   `json:"chain_symbol"`
@@ -171,8 +171,6 @@ type OptionInstrument struct {
 	Type           string   `json:"type"`
 	UpdatedAt      string   `json:"updated_at"`
 	URL            string   `json:"url"`
-
-	c *Client
 }
 
 // MarketData is the current pricing data and greeks for a given option at a
@@ -215,7 +213,7 @@ func OIsForDate(os []*OptionInstrument, d Date) []*OptionInstrument {
 	return out
 }
 
-// MarketData returns market data for all the listed Option instruments
+// MarketData returns market data for all the listed Option instruments.
 func (c *Client) MarketData(ctx context.Context, opts ...*OptionInstrument) ([]*MarketData, error) {
 	is := make([]string, len(opts))
 

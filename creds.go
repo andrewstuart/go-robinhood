@@ -39,9 +39,9 @@ func (c *CredsCacher) Token() (*oauth2.Token, error) {
 
 	mustLogin := false
 
-	err := os.MkdirAll(path.Dir(c.Path), 0750)
+	err := os.MkdirAll(path.Dir(c.Path), 0o750)
 	if err != nil {
-		return nil, fmt.Errorf("error creating path for token: %s", err)
+		return nil, fmt.Errorf("error creating path for token: %w", err)
 	}
 
 	_, err = os.Stat(c.Path)
@@ -72,7 +72,7 @@ func (c *CredsCacher) Token() (*oauth2.Token, error) {
 		return nil, err
 	}
 
-	f, err := os.OpenFile(c.Path, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0640)
+	f, err := os.OpenFile(c.Path, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0o640)
 	if err != nil {
 		return nil, err
 	}

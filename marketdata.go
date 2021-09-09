@@ -6,8 +6,8 @@ import (
 )
 
 type EntryPrice struct {
-	Amount        string
-	Currency_code string
+	Amount       string
+	CurrencyCode string `json:"currency_code"`
 }
 
 type PriceBookEntry struct {
@@ -24,7 +24,7 @@ type PriceBookData struct {
 	UpdatedAt    string `json:"updated_at"`
 }
 
-// Pricebook get the current snapshot of the pricebook data
+// Pricebook get the current snapshot of the pricebook data.
 func (c *Client) Pricebook(ctx context.Context, instrumentID string) (*PriceBookData, error) {
 	var out PriceBookData
 	err := c.GetAndDecode(ctx, fmt.Sprintf("%spricebook/snapshots/%s/", EPMarket, instrumentID), &out)

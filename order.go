@@ -11,25 +11,25 @@ import (
 	"github.com/pkg/errors"
 )
 
-// OrderSide is which side of the trade an order is on
+// OrderSide is which side of the trade an order is on.
 type OrderSide int
 
-// MarshalJSON implements json.Marshaler
+// MarshalJSON implements json.Marshaler.
 func (o OrderSide) MarshalJSON() ([]byte, error) {
 	return []byte("\"" + strings.ToLower(o.String()) + "\""), nil
 }
 
 //go:generate stringer -type OrderSide
-// Buy/Sell
+// Buy/Sell.
 const (
 	Sell OrderSide = iota + 1
 	Buy
 )
 
-// OrderType represents a Limit or Market order
+// OrderType represents a Limit or Market order.
 type OrderType int
 
-// MarshalJSON implements json.Marshaler
+// MarshalJSON implements json.Marshaler.
 func (o OrderType) MarshalJSON() ([]byte, error) {
 	return []byte(fmt.Sprintf("%q", strings.ToLower(o.String()))), nil
 }
@@ -41,7 +41,7 @@ const (
 	Limit
 )
 
-// OrderOpts encapsulates differences between order types
+// OrderOpts encapsulates differences between order types.
 type OrderOpts struct {
 	Side          OrderSide
 	Type          OrderType
@@ -96,7 +96,7 @@ func (c *Client) Order(ctx context.Context, i *Instrument, o OrderOpts) (*OrderO
 		return nil, err
 	}
 
-	post, err := http.NewRequest("POST", EPOrders, bytes.NewReader(bs))
+	post, err := http.NewRequestWithContext(ctx, "POST", EPOrders, bytes.NewReader(bs))
 	if err != nil {
 		return nil, fmt.Errorf("error creating POST http.Request: %w", err)
 	}
@@ -113,7 +113,7 @@ func (c *Client) Order(ctx context.Context, i *Instrument, o OrderOpts) (*OrderO
 	return &out, nil
 }
 
-// OrderOutput is the response from the Order api
+// OrderOutput is the response from the Order api.
 type OrderOutput struct {
 	Meta
 	Account                string        `json:"account"`
@@ -148,9 +148,9 @@ func (o *OrderOutput) Update(ctx context.Context) error {
 	return o.client.GetAndDecode(ctx, o.URL, o)
 }
 
-// Cancel attempts to cancel an odrer
+// Cancel attempts to cancel an odrer.
 func (o OrderOutput) Cancel(ctx context.Context) error {
-	post, err := http.NewRequest("POST", o.CancelURL, nil)
+	post, err := http.NewRequestWithContext(ctx, "POST", o.CancelURL, nil)
 	if err != nil {
 		return err
 	}
@@ -203,7 +203,6 @@ func (c *Client) AllOrders(ctx context.Context) ([]OrderOutput, error) {
 			Next    string
 		}
 		err := c.GetAndDecode(ctx, url, &tmp)
-
 		if err != nil {
 			return o.Results, err
 		}

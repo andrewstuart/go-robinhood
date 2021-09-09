@@ -2,7 +2,7 @@ package robinhood
 
 import "context"
 
-// Account holds the basic account details relevant to the RobinHood API
+// Account holds the basic account details relevant to the RobinHood API.
 type Account struct {
 	Meta
 	AccountNumber              string         `json:"account_number"`
@@ -28,7 +28,7 @@ type Account struct {
 	WithdrawalHalted           bool           `json:"withdrawal_halted"`
 }
 
-// CashBalances reflect the amount of cash available
+// CashBalances reflect the amount of cash available.
 type CashBalances struct {
 	Meta
 	BuyingPower                float64 `json:"buying_power,string"`
@@ -39,7 +39,7 @@ type CashBalances struct {
 	UnsettledFunds             float64 `json:"unsettled_funds,string"`
 }
 
-// MarginBalances reflect the balance available in margin accounts
+// MarginBalances reflect the balance available in margin accounts.
 type MarginBalances struct {
 	Meta
 	Cash                              float64 `json:"cash,string"`
@@ -68,14 +68,14 @@ func (c *Client) GetAccounts(ctx context.Context) ([]Account, error) {
 	return r.Results, err
 }
 
-// CryptoAccount holds the basic account details relevant to robinhood API
+// CryptoAccount holds the basic account details relevant to robinhood API.
 type CryptoAccount struct {
 	ID     string `json:"id"`
 	Status string `json:"status"`
 	UserID string `json:"user_id"`
 }
 
-// GetCryptoAccounts will return associated cryto account
+// GetCryptoAccounts will return associated cryto account.
 func (c *Client) GetCryptoAccounts(ctx context.Context) ([]CryptoAccount, error) {
 	var r struct{ Results []CryptoAccount }
 	err := c.GetAndDecode(ctx, EPCryptoAccount, &r)

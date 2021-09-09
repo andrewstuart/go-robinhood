@@ -2,7 +2,7 @@ package robinhood
 
 import "context"
 
-// Portfolio holds all information regarding the portfolio
+// Portfolio holds all information regarding the portfolio.
 type Portfolio struct {
 	Account                                string  `json:"account"`
 	AdjustedEquityPreviousClose            float64 `json:"adjusted_equity_previous_close,string"`
@@ -24,7 +24,7 @@ type Portfolio struct {
 	WithdrawableAmount                     float64 `json:"withdrawable_amount,string"`
 }
 
-// CryptoPortfolio returns all the portfolio associated with a client's account
+// CryptoPortfolio returns all the portfolio associated with a client's account.
 type CryptoPortfolio struct {
 	AccountID                string  `json:"account_id"`
 	Equity                   float64 `json:"equity,string"`
@@ -35,17 +35,17 @@ type CryptoPortfolio struct {
 }
 
 // GetPortfolios returns all the portfolios associated with a client's
-// credentials and accounts
+// credentials and accounts.
 func (c *Client) GetPortfolios(ctx context.Context) ([]Portfolio, error) {
 	var p struct{ Results []Portfolio }
 	err := c.GetAndDecode(ctx, EPPortfolios, &p)
 	return p.Results, err
 }
 
-// GetCryptoPortfolios returns crypto portfolio info
+// GetCryptoPortfolios returns crypto portfolio info.
 func (c *Client) GetCryptoPortfolios(ctx context.Context) (CryptoPortfolio, error) {
 	var p CryptoPortfolio
-	var portfolioURL = EPCryptoPortfolio + c.CryptoAccount.ID
+	portfolioURL := EPCryptoPortfolio + c.CryptoAccount.ID
 	err := c.GetAndDecode(ctx, portfolioURL, &p)
 	return p, err
 }

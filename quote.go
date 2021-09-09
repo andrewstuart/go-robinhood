@@ -6,7 +6,7 @@ import (
 )
 
 // A Quote is a representation of the data returned by the Robinhood API for
-// current stock quotes
+// current stock quotes.
 type Quote struct {
 	AdjustedPreviousClose       float64 `json:"adjusted_previous_close,string"`
 	AskPrice                    float64 `json:"ask_price,string"`
@@ -22,7 +22,7 @@ type Quote struct {
 	UpdatedAt                   string  `json:"updated_at"`
 }
 
-// GetQuote returns all the latest stock quotes for the list of stocks provided
+// GetQuote returns all the latest stock quotes for the list of stocks provided.
 func (c *Client) GetQuote(ctx context.Context, stocks ...string) ([]Quote, error) {
 	url := EPQuotes + "?symbols=" + strings.Join(stocks, ",")
 	var r struct{ Results []Quote }
@@ -30,7 +30,7 @@ func (c *Client) GetQuote(ctx context.Context, stocks ...string) ([]Quote, error
 	return r.Results, err
 }
 
-// Price returns the proper stock price even after hours
+// Price returns the proper stock price even after hours.
 func (q Quote) Price() float64 {
 	if IsRegularTradingTime() {
 		return q.LastTradePrice
