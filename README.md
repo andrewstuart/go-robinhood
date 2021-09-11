@@ -15,7 +15,7 @@ to remove any credential cache and rebuild if you experience errors.
 
 ```go
 ctx = context.Background()
-c, err := robinhood.Dial(ctx, oauth2.StaticTokenSource(&oauth2.Token{AccessToken: token}))
+c, err := robinhood.Dial(ctx, oauth2.StaticTokenSource(token))
 // handle err
 
 i, err := c.GetInstrumentForSymbol(ctx, "SPY")

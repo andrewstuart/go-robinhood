@@ -1,4 +1,9 @@
+// This is an example robinhood client written in Go
 package main
+
+// usage:
+//
+// RH_USER=email@example.org RH_PASS=password go run .
 
 import (
 	"context"
@@ -11,19 +16,28 @@ import (
 )
 
 func main() {
-	// RH_TOKEN should be set to the value of a Bearer token (a 512+ character alphanumberic string)
-	// See https://github.com/sanko/Robinhood/blob/master/Authentication.md
-	// Alternatively, look at the value of the 'Authorization' header when visiting the RobinHood website
-	token := os.Getenv("RH_TOKEN")
+	user := os.Getenv("RH_USER")
+	pass := os.Getenv("RH_PASS")
+	if user == "" || pass == "" {
+		log.Fatalf("RH_USER and RH_PASS environment variables must be defined.")
+	}
 
-	if token == "" {
-		log.Fatal("RH_TOKEN environment variable must be set.")
+	o := &robinhood.CredsCacher{
+		Creds: &robinhood.OAuth{
+			Username: os.Getenv("RH_USER"),
+			Password: os.Getenv("RH_PASS"),
+		},
+	}
+
+	token, err := o.Token()
+	if err != nil {
+		log.Fatalf("Unable to get token: %v", err)
 	}
 
 	ctx := context.Background()
 
-	log.Printf("Logging into Robinhood ...")
-	c, err := robinhood.Dial(ctx, oauth2.StaticTokenSource(&oauth2.Token{AccessToken: token}))
+	log.Printf("Logging into Robinhood as %s ...", user)
+	c, err := robinhood.Dial(ctx, oauth2.StaticTokenSource(token))
 	if err != nil {
 		log.Fatalf("dial failed: %v", err)
 	}
@@ -35,16 +49,28 @@ func main() {
 	}
 
 	for _, p := range ps {
-		log.Printf("found position: %+v", p)
-
+		log.Printf("portfolio value: $%.2f buying power: $%.2f", p.Equity, p.WithdrawableAmount)
 	}
 
-	log.Printf("Checking SPY ...")
-	i, err := c.GetInstrumentForSymbol(ctx, "SPY")
+	sym := "SPY"
+	log.Printf("Looking up %s ...", sym)
+	i, err := c.GetInstrumentForSymbol(ctx, sym)
 	if err != nil {
 		log.Fatalf("get instrument failed: %v", err)
 	}
-	log.Printf("SPY: %+v", i)
+	log.Printf("SPY is %s", i.Name)
+
+	fs, err := c.GetFundamentals(ctx, sym)
+	if err != nil {
+		log.Fatalf("get fundamentals failed: %v", err)
+	}
+	log.Printf("SPY opening price was $%.2f (52 week high: $%.2f)", fs[0].Open, fs[0].High52Weeks)
+
+	qs, err := c.GetQuote(ctx, "SPY")
+	if err != nil {
+		log.Fatalf("get quote failed: %v", err)
+	}
+	log.Printf("SPY current price is $%.2f", qs[0].Price())
 
 	if len(os.Args) == 1 {
 		return
