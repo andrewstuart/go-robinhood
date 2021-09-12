@@ -25,6 +25,7 @@ const (
 	EPLogin               = EPBase + "oauth2/token/"
 	EPAccounts            = EPBase + "accounts/"
 	EPQuotes              = EPBase + "quotes/"
+	EPHistoricals         = EPQuotes + "historicals/"
 	EPPortfolios          = EPBase + "portfolios/"
 	EPPositions           = EPBase + "positions/"
 	EPWatchlists          = EPBase + "watchlists/"
