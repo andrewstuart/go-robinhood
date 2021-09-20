@@ -1,43 +1,20 @@
-[![Go Reference](https://pkg.go.dev/badge/astuart.co/go-robinhood/v2.svg)](https://pkg.go.dev/astuart.co/go-robinhood/v2)
+[![Go Reference](https://pkg.go.dev/badge/github.com/tstromberg/roho.svg)](https://pkg.go.dev/github.com/tstromberg/roho)
 
-# Robinhood the rich and feeding the poor, now automated
+# RoHo
 
-> Even though robinhood makes me poor
-
-## Notice
-
-If you have used this library before, and use credential caching, you will need
-to remove any credential cache and rebuild if you experience errors.
+An idiomatic Go client for Robinhood. Based on https://github.com/andrewstuart/go-robinhood
 
 ## General usage
 
 ```go
-cli, err := robinhood.Dial(&robinhood.OAuth{
-  Username: "andrewstuart",
-  Password: "mypasswordissecure",
-})
+c, err := roho.New(nil)
+i, err := c.Lookup("SPY")
 
-// err
-
-i, err := cli.GetInstrumentForSymbol("SPY")
-
-// err
-
-o, err := cli.Order(i, robinhood.OrderOpts{
+o, err := cli.Buy(i, roho.OrderOpts{
   Price: 100.0,
-  Side: robinhood.Buy,
   Quantity: 1,
 })
 
-// err
-
-time.Sleep(5*time.Second) //Let me think about it some more...
-
-// Ah crap, I need to buy groceries.
-
-err := o.Cancel()
-
-if err != nil {
-  // Oh well
-}
+// Oh no! Don't buy that!
+o.Cancel()
 ```

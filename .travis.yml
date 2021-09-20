@@ -1,6 +1,0 @@
-language: go
-go_import_path: astuart.co/go-robinhood
-
-matrix:
-  allow_failures:
-    - go: tip
