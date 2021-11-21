@@ -45,7 +45,7 @@ func isWeekday(t time.Time) bool {
 // IsWeekDay returns whether the given time is a regular
 // weekday
 func IsWeekDay(t time.Time) bool {
-	return isWeekday(time.Now())
+	return isWeekday(t)
 }
 
 // NextWeekday returns the next weekday.
@@ -61,14 +61,14 @@ func NextWeekday() time.Time {
 // for regular trading.
 func IsRegularTradingTime() bool {
 	now := nyMinute()
-	return MinOpen <= now && now < MinClose
+	return isWeekday(time.Now()) && MinOpen <= now && now < MinClose
 }
 
 // IsRobinhoodExtendedTradingTime returns whether or not trades can still be
 // placed during the robinhood gold extended trading hours.
 func IsRobinhoodExtendedTradingTime() bool {
 	now := nyMinute()
-	return MinRHExtendedOpen <= now && now < MinRHExtendedClose
+	return isWeekday(time.Now()) && MinRHExtendedOpen <= now && now < MinRHExtendedClose
 }
 
 // IsExtendedTradingTime returns whether or not extended hours equity will be
