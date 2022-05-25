@@ -20,7 +20,7 @@ to remove any credential cache and rebuild if you experience errors.
 
 ```go
 cli, err := robinhood.Dial(&robinhood.OAuth{
-  Username: "andrewstuart",
+  Username: "my.email@example.com",
   Password: "mypasswordissecure",
 })
 
