@@ -12,7 +12,7 @@ Robinhood updated their API and our auth method broke. The new authentication
 requires using your email as your username, so if you see an error message about
 an invalid email, you'll need to update your username.
 
-### Sometime long ago: 
+### 2018-09-27: 
 If you have used this library before, and use credential caching, you will need
 to remove any credential cache and rebuild if you experience errors.
 
