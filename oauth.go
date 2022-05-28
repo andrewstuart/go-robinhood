@@ -1,11 +1,11 @@
 package robinhood
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/url"
-	"strings"
 	"time"
 
 	"github.com/pkg/errors"
@@ -31,32 +31,34 @@ func (p *OAuth) Token() (*oauth2.Token, error) {
 	}
 
 	u, _ := url.Parse(EPLogin)
-	q := u.Query()
-	q.Add("expires_in", fmt.Sprint(24*time.Hour/time.Second))
-	q.Add("client_id", cliID)
-	q.Add("grant_type", "password")
-	q.Add("scope", "internal")
-	u.RawQuery = q.Encode()
-
-	v := url.Values{
-		"username": []string{p.Username},
-		"password": []string{p.Password},
+	q := map[string]interface{}{
+		"expires_in":   86400,
+		"client_id":    cliID,
+		"device_token": "34898bf2-3aad-4540-8401-bea572ab8c09",
+		"grant_type":   "password",
+		"scope":        "internal",
+		"username":     p.Username,
+		"password":     p.Password,
 	}
 	if p.MFA != "" {
-		v.Add("mfa_code", p.MFA)
+		q["mfa_code"] = p.MFA
 	}
+
+	bs, _ := json.Marshal(q)
 
 	req, err := http.NewRequest(
 		"POST",
 		u.String(),
-		strings.NewReader(v.Encode()),
+		bytes.NewReader(bs),
 	)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not create request")
 	}
 
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-	req.Header.Set("Accept", "application/json")
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Accept", "*/*")
+	req.Header.Set("X-Robinhood-API-Version", "1.431.4")
+
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not post login")
