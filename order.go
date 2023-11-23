@@ -190,29 +190,31 @@ func (c *Client) AllOrders(ctx context.Context) ([]OrderOutput, error) {
 		Results []OrderOutput
 	}
 
-	url := EPOrders
-	for {
-		select {
-		case <-ctx.Done():
-			return o.Results, ctx.Err()
-		default:
-		}
-
-		var tmp struct {
-			Results []OrderOutput
-			Next    string
-		}
-		err := c.GetAndDecode(ctx, url, &tmp)
-
-		if err != nil {
-			return o.Results, err
-		}
-
-		url = tmp.Next
-		o.Results = append(o.Results, tmp.Results...)
-
-		if url == "" {
-			break
+	urls := []string{EPOrders, EPOptionOrders}
+	for _, url := range urls {
+		for {
+			select {
+			case <-ctx.Done():
+				return o.Results, ctx.Err()
+			default:
+			}
+	
+			var tmp struct {
+				Results []OrderOutput
+				Next    string
+			}
+			err := c.GetAndDecode(ctx, url, &tmp)
+	
+			if err != nil {
+				return o.Results, err
+			}
+	
+			url = tmp.Next
+			o.Results = append(o.Results, tmp.Results...)
+	
+			if url == "" {
+				break
+			}
 		}
 	}
 

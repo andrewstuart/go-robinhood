@@ -30,6 +30,7 @@ const (
 	EPWatchlists          = EPBase + "watchlists/"
 	EPInstruments         = EPBase + "instruments/"
 	EPFundamentals        = EPBase + "fundamentals/"
+	EPOptionOrders        = EPBase + "options/orders/"
 	EPOrders              = EPBase + "orders/"
 	EPOptions             = EPBase + "options/"
 	EPMarket              = EPBase + "marketdata/"
