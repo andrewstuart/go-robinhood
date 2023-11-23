@@ -208,7 +208,6 @@ func (c *Client) AllOrders(ctx context.Context) ([]OrderOutput, error) {
 			if err != nil {
 				return o.Results, err
 			}
-	
 			url = tmp.Next
 			o.Results = append(o.Results, tmp.Results...)
 	
