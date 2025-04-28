@@ -1,4 +1,4 @@
-[![Go Reference](https://pkg.go.dev/badge/astuart.co/go-robinhood/v2.svg)](https://pkg.go.dev/astuart.co/go-robinhood/v2)
+[![Go Reference](https://pkg.go.dev/badge/github.com/andrewstuart/go-robinhood/v2.svg)](https://pkg.go.dev/github.com/andrewstuart/go-robinhood/v2)
 
 # Robinhood the rich and feeding the poor, now automated
 
